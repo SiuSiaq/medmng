@@ -51,7 +51,7 @@
             required
           ></v-text-field>
           <div class="caption">Palenie</div>
-          <v-radio-group v-model="row" row>
+          <v-radio-group v-model="smoke" row>
             <v-radio label="Tak" value="true"></v-radio>
             <v-radio label="Nie" value="false"></v-radio>
           </v-radio-group>
