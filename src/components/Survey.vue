@@ -9,12 +9,18 @@
     <template v-slot:activator="{ on, attrs }">
       <v-list-item v-bind="attrs" v-on="on">
         <v-list-item-avatar>
-          <v-icon class="warning" dark> mdi-clipboard-list-outline </v-icon>
+          <v-icon :class="survey.completed ? 'success' : 'warning'" dark>
+            {{
+              survey.completed
+                ? "mdi-clipboard-check-outline"
+                : "mdi-clipboard-edit-outline"
+            }}
+          </v-icon>
         </v-list-item-avatar>
         <v-list-item-content>
-          <v-list-item-title> Prostatektomia</v-list-item-title>
+          <v-list-item-title>{{ survey.name }}</v-list-item-title>
           <v-list-item-subtitle
-            >Bogusław Biernacki 27.10.2020</v-list-item-subtitle
+            >{{ survey.date }}<br> {{ survey.description.length > 0 ? survey.description : 'Brak opisu' }}</v-list-item-subtitle
           >
         </v-list-item-content>
       </v-list-item>
@@ -29,34 +35,85 @@
       </v-toolbar>
       <div class="pa-10 mx-auto">
         <div class="text-h5 text-center">
-          Prostatektomia ankieta przed zabiegiem
+          {{ survey.name }}
         </div>
-        <v-form style="max-width: 700px" class="mx-auto mt-5">
-          <v-text-field
-            :rules="[(v) => !!v || 'Waga jest wymagana']"
-            type="number"
-            label="Waga (kg)"
-            required
-          ></v-text-field>
-          <v-text-field
-            :rules="[(v) => !!v || 'Wzrost jest wymagany']"
-            type="number"
-            label="Wzrost (cm)"
-            required
-          ></v-text-field>
-          <v-text-field
-            :rules="[(v) => !!v || 'Obwód pasa jest wymagany']"
-            type="number"
-            label="Obwód pasa (cm)"
-            required
-          ></v-text-field>
-          <div class="caption">Palenie</div>
-          <v-radio-group v-model="smoke" row>
-            <v-radio label="Tak" value="true"></v-radio>
-            <v-radio label="Nie" value="false"></v-radio>
-          </v-radio-group>
+        <v-form
+          :readonly="survey.completed || sendable"
+          v-model="valid"
+          ref="form"
+          style="max-width: 700px"
+          class="mx-auto mt-5"
+        >
+          <div class="caption">Opis</div>
+          <div>{{ survey.description.length > 0 ? survey.description : 'Brak opisu' }}</div>
+          <div v-for="(field, i) in survey.fields" :key="i">
+            <v-text-field
+              outlined
+              v-if="field.type === 'number'"
+              :rules="[(v) => !!v || `Pole jest wymagane`]"
+              type="number"
+              :label="
+                field.unit ? field.name + ' (' + field.unit + ')' : field.name
+              "
+              :required="field.required"
+              v-model="field.data"
+            ></v-text-field>
+            <v-text-field
+              outlined
+              v-else-if="field.type === 'text'"
+              :rules="[(v) => !!v || `Pole jest wymagane`]"
+              :label="field.name"
+              :required="field.required"
+              v-model="field.data"
+            ></v-text-field>
+            <v-select
+              outlined
+              v-else-if="field.type === 'select'"
+              :label="field.name"
+              :rules="[(v) => !!v || `Pole jest wymagane`]"
+              :required="field.required"
+              :items="field.options"
+              v-model="field.data"
+            >
+            </v-select>
+            <v-radio-group
+              v-else-if="field.type === 'radio'"
+              :required="field.required"
+              :label="field.name"
+              v-model="field.data"
+              :multiple="field.multiple"
+              :rules="[(v) => !!v || `Pole jest wymagane`]"
+            >
+              <v-radio
+                v-for="(item, i) in field.options"
+                :key="i"
+                :value="item.text"
+                :label="item.text"
+              ></v-radio>
+            </v-radio-group>
+            <v-radio-group
+              v-else-if="field.type === 'truefalse'"
+              :required="field.required"
+              :label="field.name"
+              v-model="field.data"
+              :rules="[(v) => !!v || `Pole jest wymagane`]"
+            >
+              <v-radio value="true" label="Tak"></v-radio>
+              <v-radio value="false" label="Nie"></v-radio>
+            </v-radio-group>
+          </div>
           <div class="d-flex justify-end">
-            <v-btn color="primary">Zapisz</v-btn>
+            <SendSurvey :survey="survey" v-if="sendable" />
+            <v-btn
+              v-else-if="!survey.completed"
+              color="primary"
+              :loading="loader"
+              @click.prevent="submitClick"
+              >Wyślij</v-btn
+            >
+            <v-btn v-else color="primary" @click.prevent="dialog = false"
+              >Zamknij</v-btn
+            >
           </div>
         </v-form>
       </div>
@@ -65,10 +122,29 @@
 </template>
 
 <script>
+import { mapActions } from "vuex";
+import SendSurvey from "@/components/SendSurvey";
 export default {
+  props: ["survey", "sendable"],
   data: () => ({
     dialog: false,
-    smoke: false,
+    loader: false,
+    valid: true,
   }),
+  methods: {
+    ...mapActions(["submitSurvey"]),
+    async submitClick() {
+      if (!this.$refs.form.validate()) return;
+      this.loader = true;
+      await this.submitSurvey(this.survey);
+      this.loader = false;
+    },
+    reset() {
+      this.$refs.form.reset();
+    },
+  },
+  components: {
+    SendSurvey,
+  },
 };
 </script>

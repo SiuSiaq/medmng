@@ -1,9 +1,75 @@
 <template>
-  <v-app-bar color="primary" dark flat>
-    <v-toolbar-title class="text-h5">MED<span class="font-weight-light">MNG</span></v-toolbar-title>
-  </v-app-bar>
+  <nav>
+    <v-app-bar flat dark color="primary">
+      <v-app-bar-nav-icon
+        v-if="getIsLoggedIn"
+        @click="draw = !draw"
+      ></v-app-bar-nav-icon>
+
+      <v-toolbar-title class="text-uppercase font-weight-bold white--text">
+        Med
+        <span class="font-weight-light">Mng</span>
+      </v-toolbar-title>
+      <v-spacer></v-spacer>
+    </v-app-bar>
+
+    <v-navigation-drawer v-model="draw" color="primary" app temporary>
+      <v-list nav>
+        <v-list-item-group>
+          <v-list-item
+            v-for="item in items"
+            :key="item.text"
+            router
+            :to="item.route"
+          >
+            <v-list-item-icon>
+              <v-icon class="white--text">{{ item.icon }}</v-icon>
+            </v-list-item-icon>
+
+            <v-list-item-content>
+              <v-list-item-title
+                class="white--text"
+                v-text="item.text"
+              ></v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+          <v-list-item @click="logOutClick">
+            <v-list-item-icon>
+              <v-icon class="white--text">mdi-logout-variant</v-icon>
+            </v-list-item-icon>
+
+            <v-list-item-content>
+              <v-list-item-title class="white--text">Wyloguj</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list-item-group>
+      </v-list>
+    </v-navigation-drawer>
+  </nav>
 </template>
 
 <script>
-export default {};
+import { mapActions, mapGetters } from "vuex";
+export default {
+  components: {},
+  data: () => ({
+    draw: false,
+    settings: "/settings",
+    items: [
+      { icon: "mdi-view-dashboard", text: "Home", route: "/" },
+      { icon: "mdi-clipboard-list-outline", text: "Ankiety", route: "/surveys" },
+      { icon: "mdi-clipboard-edit-outline", text: "Stwórz ankietę", route: "/createsurvey" },
+    ],
+  }),
+  methods: {
+    ...mapActions(["logOut"]),
+    async logOutClick() {
+      await this.logOut();
+      this.$router.go("/login");
+    },
+  },
+  computed: {
+    ...mapGetters(["getIsLoggedIn"]),
+  },
+};
 </script>

@@ -9,15 +9,17 @@
 
 <script>
 import Navbar from '@/components/Navbar'
+import { mapActions } from 'vuex';
 export default {
   name: 'App',
-
   components: {
     Navbar,
   },
-
-  data: () => ({
-    //
-  }),
+  methods: {
+    ...mapActions(['authStateChanged']),
+  },
+  created() {
+    this.authStateChanged();
+  }
 };
 </script>
