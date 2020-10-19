@@ -3,7 +3,7 @@
     <v-card
       class="mx-auto mt-16"
       max-width="800"
-      :height="!$vuetify.breakpoint.mobile ? '400' : '500'"
+      :min-height="!$vuetify.breakpoint.mobile ? '400' : '500'"
       elevation="24"
       rounded="xl"
     >
