@@ -42,14 +42,13 @@ const actions = {
     async submitSurvey({ commit, rootState }, survey) {
         try {
             survey.completed = true
-            await db.collection('surveys').doc(survey.id).update({
-                completed: true,
-                completedDate: new Date().toISOString().slice(0,10),
-            })
             const res = await db.collection('patients').doc(rootState.login.user.uid).get()
             let surveys = res.data().surveys
             surveys.forEach((s) => {
-                if(s.id === survey.id) s.completed = true
+                if(s.id === survey.id) {
+                    s.completed = true
+                    s.completedDate = new Date().toISOString().slice(0,10)
+                }
             })
             await db.collection('patients').doc(rootState.login.user.uid).update({
                 surveys: surveys,
@@ -78,7 +77,6 @@ const actions = {
             await db.collection('patients').doc(payload.id).update({
                 surveys: fieldValue.arrayUnion(payload.survey)
             })
-            console.log(`Pomyślnie wysłano ankietę do ${payload.id}`)
         } catch (error) {
             console.error(error)
         }
