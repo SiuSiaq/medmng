@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <v-card max-width="500px" class="mt-15 mx-auto px-5">
+    <v-card max-width="700px" elevation="24" rounded="xl" class="mt-15 mx-auto px-5">
       <v-card-title class="grey--text">Logowanie</v-card-title>
       <v-form ref="form" v-model="valid">
         <v-text-field v-model="email" :rules="emailRules" label="E-mail" required></v-text-field>

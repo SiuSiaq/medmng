@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <Navbar />
-    <v-main>
+    <v-main class="appstyle">
       <router-view></router-view>
     </v-main>
   </v-app>
@@ -23,3 +23,9 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+  .appstyle{
+    background: #1976d2;
+  }
+</style>

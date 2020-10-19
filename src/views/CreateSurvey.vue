@@ -162,7 +162,6 @@ export default {
 <style scoped>
 .back {
   height: 91vh;
-  background: #1976d2;
 }
 .borderClass {
   border-bottom: 3px solid #1976d2;

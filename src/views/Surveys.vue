@@ -59,6 +59,5 @@ export default {
 <style scoped>
 .surveys {
   height: 91vh;
-  background: #1976d2;
 }
 </style>
