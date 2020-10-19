@@ -45,7 +45,7 @@
           class="mx-auto mt-5"
         >
           <div class="caption">Opis</div>
-          <div>{{ survey.description.length > 0 ? survey.description : 'Brak opisu' }}</div>
+          <div class="mb-2">{{ survey.description.length > 0 ? survey.description : 'Brak opisu' }}</div>
           <div v-for="(field, i) in survey.fields" :key="i">
             <v-text-field
               outlined

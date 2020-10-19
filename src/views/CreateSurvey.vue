@@ -140,6 +140,9 @@ export default {
     async saveClick() {
       if (!this.$refs.surveyForm.validate()) return;
       this.loader = true;
+      this.survey.fields.forEach((field) => {
+        if(field.type !== 'select' && field.type !== 'radio') delete field.options
+      })
       await this.createSurvey(this.survey);
       this.loader = false;
     },
