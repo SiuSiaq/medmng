@@ -15,7 +15,7 @@ const actions = {
             let user = await auth.signInWithEmailAndPassword(userData.email, userData.password);
             if (user) {
                 commit('setIsLoggedIn', true);
-                commit('setUser', user);
+                commit('setUser', user.user);
             }
             else return false;
         } catch (error) {
