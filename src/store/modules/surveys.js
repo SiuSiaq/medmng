@@ -53,7 +53,7 @@ const actions = {
             await db.collection('patients').doc(rootState.login.user.uid).update({
                 surveys: surveys,
             })
-            commit('setSurveys', surveys)
+            commit('surveySubmited', survey)
 
             dispatch('throwSurveyAlert', {
                 text: 'Ankieta wysłana pomyślnie',
@@ -77,13 +77,13 @@ const actions = {
             commit('surveyCreated', survey)
             dispatch('throwMainAlert', {
                 text: 'Ankieta utworzona',
-                succes: true,
+                success: true,
             })
         } catch (error) {
             console.error(error)
             dispatch('throwMainAlert', {
                 text: 'Nie udało się utworzyć ankiety',
-                succes: false,
+                success: false,
             })
         }
     },
@@ -112,6 +112,7 @@ const mutations = {
     setPatientSurveys: (state, data) => state.patientSurveys = data,
     addPatientSurvey: (state, data) => state.patientSurveys.unshift(data),
     surveyCreated: (state, data) => state.surveys.unshift(data),
+    surveySubmited: (state, data) => state.surveys.map((obj) => obj.id === data.id ? data : obj),
 }
 
 export default {
