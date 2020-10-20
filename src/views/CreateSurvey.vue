@@ -6,6 +6,8 @@
       class="mx-auto mt-14 px-3"
       max-width="1300"
       min-height="400"
+      :loading="loader"
+      :disabled="loader"
     >
       <v-card-title class="text-center grey--text text--darken-2"
         >Nowa ankieta</v-card-title
@@ -15,8 +17,11 @@
         class="d-flex justify-center align-center"
         style="height: 250px"
       >
-        <v-btn large color="primary" @click="create = true"
+        <v-btn v-if="!next" large color="primary" @click="create = true"
           >stwórz ankietę</v-btn
+        >
+        <v-btn v-else large color="primary" @click="create = true"
+          >stwórz kolejną ankietę</v-btn
         >
       </div>
       <div v-else>
@@ -99,6 +104,7 @@ export default {
     NewField,
   },
   data: () => ({
+    next: false,
     create: false,
     loader: false,
     valid: true,
@@ -140,11 +146,20 @@ export default {
     async saveClick() {
       if (!this.$refs.surveyForm.validate()) return;
       this.loader = true;
+      this.next = true;
       this.survey.fields.forEach((field) => {
-        if(field.type !== 'select' && field.type !== 'radio') delete field.options
-      })
+        if (field.type !== "select" && field.type !== "radio")
+          delete field.options;
+      });
       await this.createSurvey(this.survey);
       this.loader = false;
+      this.survey = {
+        name: "",
+        treatment: "",
+        description: "",
+        fields: [],
+      };
+      this.create = false;
     },
     deleteSurveyClick() {
       this.survey = {
@@ -153,7 +168,7 @@ export default {
         description: "",
         fields: [],
       };
-      this.create = false
+      this.create = false;
     },
   },
 };
