@@ -3,6 +3,7 @@ import Vuex from 'vuex'
 import login from './modules/login'
 import surveys from './modules/surveys'
 import patients from './modules/patients'
+import alert from './modules/alert'
 
 Vue.use(Vuex)
 
@@ -17,5 +18,6 @@ export default new Vuex.Store({
     login,
     surveys,
     patients,
+    alert,
   }
 })

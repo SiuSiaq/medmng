@@ -83,7 +83,7 @@
           <v-btn color="primary mb-5" @click="addFliedClick">Dodaj pole</v-btn>
           <v-spacer></v-spacer>
           <v-btn color="primary mb-5" @click="saveClick" :loading="loader"
-            >Zapisz ankietę</v-btn
+            >Utwórz ankietę</v-btn
           >
         </v-card-actions>
       </div>

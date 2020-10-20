@@ -13,10 +13,12 @@
       <v-card-text>
         <v-list two-line>
           <v-list-item-group>
-            <v-subheader inset v-if="getIncompletedPatientSurveys.length > 0">Do wypełnienia</v-subheader>
+            <v-subheader inset>Do wypełnienia</v-subheader>
+            <div class="text-subtitle-1 ml-5" v-if="getIncompletedPatientSurveys.length === 0">Brak ankiet do wypełnienia</div>
             <Survey v-for="(survey, i) in getIncompletedPatientSurveys" :key="i" :survey="survey"/>
             <v-divider inset v-if="getIncompletedPatientSurveys.length > 0 && getCompletedPatientSurveys.length > 0"></v-divider>
-            <v-subheader inset v-if="getCompletedPatientSurveys.length > 0">Wypełnione</v-subheader>
+            <v-subheader inset>Wypełnione</v-subheader>
+            <div class="text-subtitle-1 ml-5" v-if="getCompletedPatientSurveys.length === 0">Brak wypełnionych ankiet</div>
             <Survey v-for="(survey, i) in getCompletedPatientSurveys" :key="i" :survey="survey"/>
           </v-list-item-group>
         </v-list>

@@ -20,7 +20,10 @@
         <v-list-item-content>
           <v-list-item-title>{{ survey.name }}</v-list-item-title>
           <v-list-item-subtitle
-            >{{ survey.date }}<br> {{ survey.description.length > 0 ? survey.description : 'Brak opisu' }}</v-list-item-subtitle
+            >{{ survey.date }}<br />
+            {{
+              survey.description.length > 0 ? survey.description : "Brak opisu"
+            }}</v-list-item-subtitle
           >
         </v-list-item-content>
       </v-list-item>
@@ -33,6 +36,15 @@
         <v-toolbar-title>Ankieta</v-toolbar-title>
         <v-spacer></v-spacer>
       </v-toolbar>
+      <v-alert
+        transition="slide-y-transition"
+        dense
+        :type="getSurveyAlert.success ? 'success' : 'error'"
+        rounded="0"
+        v-model="getSurveyAlert.show"
+      >
+        {{ getSurveyAlert.text }}
+      </v-alert>
       <div class="pa-10 mx-auto">
         <div class="text-h5 text-center">
           {{ survey.name }}
@@ -45,7 +57,11 @@
           class="mx-auto mt-5"
         >
           <div class="caption">Opis</div>
-          <div class="mb-2">{{ survey.description.length > 0 ? survey.description : 'Brak opisu' }}</div>
+          <div class="mb-2">
+            {{
+              survey.description.length > 0 ? survey.description : "Brak opisu"
+            }}
+          </div>
           <div v-for="(field, i) in survey.fields" :key="i">
             <v-text-field
               outlined
@@ -122,7 +138,7 @@
 </template>
 
 <script>
-import { mapActions } from "vuex";
+import { mapActions, mapGetters } from "vuex";
 import SendSurvey from "@/components/SendSurvey";
 export default {
   props: ["survey", "sendable"],
@@ -143,6 +159,7 @@ export default {
       this.$refs.form.reset();
     },
   },
+  computed: mapGetters(['getSurveyAlert']),
   components: {
     SendSurvey,
   },

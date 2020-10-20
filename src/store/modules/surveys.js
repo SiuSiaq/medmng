@@ -39,7 +39,7 @@ const actions = {
             console.error(error)
         }
     },
-    async submitSurvey({ commit, rootState }, survey) {
+    async submitSurvey({ commit, rootState, dispatch }, survey) {
         try {
             survey.completed = true
             const res = await db.collection('patients').doc(rootState.login.user.uid).get()
@@ -54,11 +54,20 @@ const actions = {
                 surveys: surveys,
             })
             commit('setSurveys', surveys)
+
+            dispatch('throwSurveyAlert', {
+                text: 'Ankieta wysłana pomyślnie',
+                success: true,
+            })
         } catch (error) {
             console.error(error)
+            dispatch('throwSurveyAlert', {
+                text: 'Wysyłanie ankiety nie powiodło się',
+                success: false,
+            })
         }
     },
-    async createSurvey({ commit, rootState }, survey) {
+    async createSurvey({ commit, rootState, dispatch }, survey) {
         try {
             survey.date = new Date().toISOString().slice(0, 10)
             survey.author = db.collection('patients').doc(rootState.login.user.uid)
@@ -66,19 +75,34 @@ const actions = {
             const res = await db.collection('surveys').add(survey);
             survey.id = res.id
             commit('surveyCreated', survey)
-            console.log('Survey created!')
+            dispatch('throwMainAlert', {
+                text: 'Ankieta utworzona',
+                succes: true,
+            })
         } catch (error) {
             console.error(error)
+            dispatch('throwMainAlert', {
+                text: 'Nie udało się utworzyć ankiety',
+                succes: false,
+            })
         }
     },
-    async sendSurvey({ rootState }, payload) {
+    async sendSurvey({ rootState, dispatch }, payload) {
         if (!rootState) return
         try {
             await db.collection('patients').doc(payload.id).update({
                 surveys: fieldValue.arrayUnion(payload.survey)
             })
+            dispatch('throwSurveyAlert', {
+                text: 'Ankieta pomyślnie wysłana do pacjent',
+                success: true,
+            })
         } catch (error) {
             console.error(error)
+            dispatch('throwSurveyAlert', {
+                text: 'Wysyłanie ankiety nie powiodło się',
+                success: false,
+            })
         }
     },
 }
