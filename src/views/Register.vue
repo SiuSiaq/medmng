@@ -7,12 +7,15 @@
       <v-stepper-content step="1">
         <v-form ref="registerForm" v-model="valid">
           <v-text-field
+            class="mt-1"
+            outlined
             v-model="email"
             :rules="emailRules"
             label="E-mail"
             required
           ></v-text-field>
           <v-text-field
+            outlined
             v-model="password"
             :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
             :rules="passwordRules"
@@ -38,6 +41,8 @@
       <v-stepper-content step="2">
         <v-form ref="personalForm" v-model="personalValid" class="mx-5">
           <v-text-field
+            class="mt-1"
+            outlined
             v-model="name"
             :counter="50"
             :rules="nameRules"
@@ -45,6 +50,7 @@
             required
           ></v-text-field>
           <v-text-field
+            outlined
             v-model="surname"
             :counter="50"
             :rules="surnameRules"
@@ -52,12 +58,14 @@
             required
           ></v-text-field>
           <v-text-field
+            outlined
             v-model="phone"
             :rules="phoneRules"
             label="Telefon"
             required
           ></v-text-field>
           <v-text-field
+            outlined
             v-model="pesel"
             :rules="peselRules"
             label="PESEL"
@@ -82,6 +90,8 @@
       <v-stepper-content step="3">
         <v-form ref="addressForm" v-model="addressValid" class="mx-5">
           <v-text-field
+            class="mt-1"
+            outlined
             v-model="address.city"
             :counter="40"
             :rules="cityRules"
@@ -89,6 +99,7 @@
             required
           ></v-text-field>
           <v-text-field
+            outlined
             v-model="address.street"
             :counter="100"
             :rules="streetRules"
@@ -96,18 +107,20 @@
             required
           ></v-text-field>
           <v-text-field
+            outlined
             v-model="address.local_number"
             label="Numer lokalu (opcjonalne)"
             type="number"
           ></v-text-field>
           <v-text-field
+            outlined
             v-model="address.zip_code"
             :counter="6"
             :rules="zipcodeRules"
             label="Kod pocztowy"
             required
           ></v-text-field>
-          <div class="d-flex">
+          <div class="d-flex mt-2 mb-1">
             <v-btn text @click="el = 2"> Wróć </v-btn>
             <v-spacer></v-spacer>
             <v-btn
@@ -175,7 +188,7 @@ export default {
     ],
     zipcodeRules: [
       (v) => !!v || "Kod pocztowy jest wymagany",
-      (v) => /^\\d{2}[- ]{0,1}\\d{3}$/.test(v) || "Niepoprawny kod pocztowy",
+      (v) => /^\d{2}-\d{3}$/.test(v) || "Niepoprawny kod pocztowy",
       (v) => (v && v.length <= 6) || "Niepoprawny kod pocztowy",
     ],
     cityRules: [
@@ -213,10 +226,7 @@ export default {
         name: this.name,
         surname: this.surname,
         phone: this.phone,
-        local_number:
-          !this.local_number || this.local_number <= 0
-            ? null
-            : this.local_number,
+        local_number: this.local_number,
       };
       await this.register(data);
       this.loader = false;

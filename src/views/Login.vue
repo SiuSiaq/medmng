@@ -1,10 +1,25 @@
 <template>
   <v-container>
-    <v-card max-width="700px" elevation="24" rounded="xl" class="mt-15 mx-auto px-5">
-      <v-card-title class="grey--text">Logowanie</v-card-title>
-      <v-form ref="form" v-model="valid">
-        <v-text-field v-model="email" :rules="emailRules" label="E-mail" required></v-text-field>
+    <v-card
+      min-height="300"
+      max-width="700px"
+      elevation="24"
+      rounded="xl"
+      class="mt-15 mx-auto px-5"
+    >
+      <v-card-title class="text-h4 grey--text text--darken-2 mb-5"
+        >Logowanie</v-card-title
+      >
+      <v-form class="px-3" ref="form" v-model="valid">
         <v-text-field
+          outlined
+          v-model="email"
+          :rules="emailRules"
+          label="E-mail"
+          required
+        ></v-text-field>
+        <v-text-field
+          outlined
           v-model="password"
           :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
           :rules="passwordRules"
@@ -13,23 +28,21 @@
           hint="Conajmniej 6 znaków"
           counter
           @click:append="show = !show"
+          class="mb-2"
         ></v-text-field>
       </v-form>
       <v-card-actions>
-          <v-btn @click="reset" text>resetuj</v-btn>
-          <v-btn
-            color="primary"
-            text
-            :loading="loader"
-            :disabled="!valid"
-            @click="logInClick"
-          >zaloguj</v-btn>
-          <v-spacer></v-spacer>
-          <v-btn
-            color="primary"
-            text
-            @click="$router.push('/register')"
-          >Rejestracja</v-btn>
+        <v-btn color="primary" text @click="$router.push('/register')"
+          >Rejestracja</v-btn
+        >
+        <v-spacer></v-spacer>
+        <v-btn
+          color="primary"
+          :loading="loader"
+          :disabled="!valid"
+          @click="logInClick"
+          >zaloguj</v-btn
+        >
       </v-card-actions>
     </v-card>
   </v-container>

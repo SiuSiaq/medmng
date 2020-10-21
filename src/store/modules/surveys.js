@@ -72,7 +72,7 @@ const actions = {
             survey.date = new Date().toISOString().slice(0, 10)
             survey.author = db.collection('patients').doc(rootState.login.user.uid)
             survey.completed = false
-            const res = await db.collection('surveys').add(survey);
+            const res = await db.collection('surveys').add(survey)
             survey.id = res.id
             commit('surveyCreated', survey)
             dispatch('throwMainAlert', {
@@ -87,8 +87,7 @@ const actions = {
             })
         }
     },
-    async sendSurvey({ rootState, dispatch }, payload) {
-        if (!rootState) return
+    async sendSurvey({ dispatch }, payload) {
         try {
             await db.collection('patients').doc(payload.id).update({
                 surveys: fieldValue.arrayUnion(payload.survey)
