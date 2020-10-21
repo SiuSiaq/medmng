@@ -5,6 +5,7 @@ import Home from '@/views/Home'
 import Surveys from '@/views/Surveys'
 import CreateSurvey from '@/views/CreateSurvey'
 import Login from '@/views/Login'
+import Register from '@/views/Register'
 
 Vue.use(VueRouter)
 
@@ -37,6 +38,14 @@ const routes = [
     path: '/login',
     name: 'Login',
     component: Login,
+    meta: {
+      requiresGuest: true,
+    },
+  },
+  {
+    path: '/register',
+    name: 'Register',
+    component: Register,
     meta: {
       requiresGuest: true,
     },

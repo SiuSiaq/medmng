@@ -15,10 +15,8 @@
           @click:append="show = !show"
         ></v-text-field>
       </v-form>
-      <v-card-actions>  
-        <v-card-actions>
+      <v-card-actions>
           <v-btn @click="reset" text>resetuj</v-btn>
-          <v-spacer></v-spacer>
           <v-btn
             color="primary"
             text
@@ -26,7 +24,12 @@
             :disabled="!valid"
             @click="logInClick"
           >zaloguj</v-btn>
-        </v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="primary"
+            text
+            @click="$router.push('/register')"
+          >Rejestracja</v-btn>
       </v-card-actions>
     </v-card>
   </v-container>
