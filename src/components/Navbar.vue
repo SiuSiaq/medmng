@@ -58,7 +58,7 @@ export default {
     items: [
       { icon: "mdi-view-dashboard", text: "Home", route: "/" },
       { icon: "mdi-clipboard-list-outline", text: "Ankiety", route: "/surveys" },
-      { icon: "mdi-clipboard-edit-outline", text: "Stwórz ankietę", route: "/createsurvey" },
+      { icon: "mdi-needle", text: "Zabiegi", route: "/treatments" },
       { icon: "mdi-account", text: "Dane osobowe", route: "/personaldata" },
     ],
   }),

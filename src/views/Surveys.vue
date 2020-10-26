@@ -1,8 +1,8 @@
 <template>
-  <v-container fluid class="surveys">
+  <v-container fluid>
     <v-card
       class="mx-auto mt-16"
-      max-width="800"
+      max-width="1100"
       :min-height="!$vuetify.breakpoint.mobile ? '400' : '500'"
       elevation="24"
       rounded="xl"
@@ -32,6 +32,10 @@
           </v-list-item-group>
         </v-list>
       </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <CreateSurvey />
+      </v-card-actions>
     </v-card>
   </v-container>
 </template>
@@ -39,6 +43,7 @@
 <script>
 import { mapActions, mapGetters } from "vuex";
 import Survey from "@/components/Survey";
+import CreateSurvey from "@/components/CreateSurvey";
 export default {
   methods: {
     ...mapActions(["fetchSurveys", 'fetchPatients']),
@@ -48,6 +53,7 @@ export default {
   },
   components: {
     Survey,
+    CreateSurvey,
   },
   mounted() {
     this.fetchSurveys();
@@ -55,9 +61,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.surveys {
-  height: 91vh;
-}
-</style>

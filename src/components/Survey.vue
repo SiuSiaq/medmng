@@ -9,7 +9,7 @@
     <template v-slot:activator="{ on, attrs }">
       <v-list-item v-bind="attrs" v-on="on">
         <v-list-item-avatar>
-          <v-icon :class="survey.completed ? 'success' : 'warning'" dark>
+          <v-icon :class="survey.completed ? 'success' : 'warning'" class="white--text">
             {{
               survey.completed
                 ? "mdi-clipboard-check-outline"
@@ -118,7 +118,11 @@
               <v-radio value="false" label="Nie"></v-radio>
             </v-radio-group>
           </div>
-          <div class="d-flex justify-end">
+          <div class="d-flex">
+            <v-btn text color="primary" v-if="sendable">
+              Dodaj do zabiegu
+            </v-btn>
+            <v-spacer></v-spacer>
             <SendSurvey :survey="survey" v-if="sendable" />
             <v-btn
               v-else-if="!survey.completed"

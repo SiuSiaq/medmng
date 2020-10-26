@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <v-stepper v-model="el" vertical class="rounded-xl mt-10">
+    <v-stepper style="max-width: 800px;" v-model="el" vertical class="mx-auto rounded-xl mt-10">
       <div class="text-h4 grey--text text--darken-2 ml-4 mt-4">Rejestracja</div>
       <v-stepper-step step="1" :complete="el > 1"> Dane konta </v-stepper-step>
 

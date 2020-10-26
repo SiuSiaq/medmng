@@ -2,22 +2,22 @@
   <v-container fluid class="home">
     <v-card
       class="mx-auto mt-16"
-      max-width="800"
+      max-width="1100"
       :min-height="!$vuetify.breakpoint.mobile ? '400' : '500'"
       elevation="24"
       rounded="xl"
     >
-      <v-card-title class="grey--text text--darken-2"
+      <v-card-title class="text-h4 grey--text text--darken-2"
         >Ankiety</v-card-title
       >
       <v-card-text>
         <v-list two-line>
           <v-list-item-group>
-            <v-subheader inset>Do wypełnienia</v-subheader>
+            <v-subheader>Do wypełnienia</v-subheader>
             <div class="text-subtitle-1 ml-5" v-if="getIncompletedPatientSurveys.length === 0">Brak ankiet do wypełnienia</div>
             <Survey v-for="survey in getIncompletedPatientSurveys" :key="survey.id" :survey="survey"/>
             <v-divider inset v-if="getIncompletedPatientSurveys.length > 0 && getCompletedPatientSurveys.length > 0"></v-divider>
-            <v-subheader inset>Wypełnione</v-subheader>
+            <v-subheader>Wypełnione</v-subheader>
             <div class="text-subtitle-1 ml-5" v-if="getCompletedPatientSurveys.length === 0">Brak wypełnionych ankiet</div>
             <Survey v-for="survey in getCompletedPatientSurveys" :key="survey.id" :survey="survey"/>
           </v-list-item-group>

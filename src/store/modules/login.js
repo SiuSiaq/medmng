@@ -2,11 +2,14 @@ import { auth, db } from "@/main"
 const state = {
     isLoggedIn: false,
     user: null,
+    userData: {},
 }
 
 const getters = {
     getIsLoggedIn: state => state.isLoggedIn,
     getUser: state => state.user,
+    getUserData: state => state.userData,
+    getAddress: state => state.userData.address,
 }
 
 const actions = {
@@ -14,23 +17,28 @@ const actions = {
         try {
             let decoded = peselDecode(userCredentials.pesel);
             let user = await auth.createUserWithEmailAndPassword(userCredentials.email, userCredentials.password);
-            sleep(5000);
+            console.log(`Register: ${user.user.uid}`);
             if (user) {
                 commit('setIsLoggedIn', true);
                 commit('setUser', user.user);
+                sleep(4000);
                 await db.collection('patients').doc(user.user.uid).update({
                     fullname: `${userCredentials.name} ${userCredentials.surname}`,
                     name: userCredentials.name,
                     surname: userCredentials.surname,
                     phone: userCredentials.phone,
                     address: userCredentials.address,
-                    local_number: userCredentials.local_number,
+                    local_number: userCredentials.local_number === undefined ? null : userCredentials.local_number,
                     birthday: decoded.date,
                     sex: decoded.sex,
                     registered: new Date(),
                 });
+                let tmp = await db.collection('patients').doc(user.user.uid).get();
+                let userData = tmp.data();
+                userData.uid = tmp.id;
+                commit('setUserData', userData);
+                return true;
             }
-            else return false;
         } catch (error) {
             console.log(error.code);
             return false;
@@ -43,6 +51,10 @@ const actions = {
             if (user) {
                 commit('setIsLoggedIn', true);
                 commit('setUser', user.user);
+                let tmp = await db.collection('patients').doc(user.user.uid).get();
+                let userData = tmp.data();
+                userData.uid = tmp.id;
+                commit('setUserData', userData);
             }
             else return false;
         } catch (error) {
@@ -64,6 +76,10 @@ const actions = {
                 // User is signed in.
                 commit('setIsLoggedIn', true);
                 commit('setUser', user);
+                let tmp = await db.collection('patients').doc(user.uid).get();
+                let userData = tmp.data();
+                userData.uid = tmp.id;
+                commit('setUserData', userData);
 
                 /*var email = user.email;
                 var uid = user.uid;
@@ -83,6 +99,7 @@ const actions = {
 const mutations = {
     setIsLoggedIn: (state, data) => state.isLoggedIn = data,
     setUser: (state, data) => state.user = data,
+    setUserData: (state, data) => state.userData = data,
 }
 
 export default {

@@ -5,6 +5,7 @@ import Home from '@/views/Home'
 import Surveys from '@/views/Surveys'
 import CreateSurvey from '@/views/CreateSurvey'
 import Person from '@/views/Person'
+import Treatments from '@/views/Treatments'
 import Login from '@/views/Login'
 import Register from '@/views/Register'
 
@@ -39,6 +40,14 @@ const routes = [
     path: '/personaldata',
     name: 'PersonalData',
     component: Person,
+    meta: {
+      requiresAuth: true,
+    },
+  },
+  {
+    path: '/treatments',
+    name: 'Treatments',
+    component: Treatments,
     meta: {
       requiresAuth: true,
     },

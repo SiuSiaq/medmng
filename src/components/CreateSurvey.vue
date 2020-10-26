@@ -1,31 +1,47 @@
 <template>
-  <v-container fluid class="back">
-    <v-card
-      rounded="xl"
-      elevation="24"
-      class="mx-auto mt-16 px-3"
-      max-width="1100"
-      min-height="400"
-      :loading="loader"
-      :disabled="loader"
-    >
-      <v-card-title class="text-center grey--text text--darken-2"
-        >Nowa ankieta</v-card-title
+  <v-dialog
+    v-model="dialog"
+    width="500"
+    fullscreen
+    hide-overlay
+    transition="dialog-bottom-transition"
+  >
+    <template v-slot:activator="{ on, attrs }">
+      <v-btn v-bind="attrs" v-on="on" class="mr-2 mb-2" color="primary"
+        >Stwórz ankietę</v-btn
       >
-      <div
-        v-if="!create"
-        class="d-flex justify-center align-center"
-        style="height: 250px"
+    </template>
+    <v-card>
+      <v-toolbar dark color="primary">
+        <v-btn icon dark @click="dialog = false">
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+        <v-toolbar-title>Stwórz ankietę</v-toolbar-title>
+        <v-spacer></v-spacer>
+      </v-toolbar>
+      <v-alert
+        transition="slide-y-transition"
+        dense
+        :type="getSurveyAlert.success ? 'success' : 'error'"
+        rounded="0"
+        v-model="getSurveyAlert.show"
       >
-        <v-btn v-if="!next" large color="primary" @click="create = true"
-          >stwórz ankietę</v-btn
+        {{ getSurveyAlert.text }}
+      </v-alert>
+      <div class="mx-md-16 mt-md-10 mt-3">
+        <div
+          v-if="!create"
+          class="d-flex justify-center align-center"
+          style="height: 250px"
         >
-        <v-btn v-else large color="primary" @click="create = true"
-          >stwórz kolejną ankietę</v-btn
-        >
-      </div>
-      <div v-else>
-        <v-card-text>
+          <v-btn v-if="!next" large color="primary" @click="create = true"
+            >stwórz ankietę</v-btn
+          >
+          <v-btn v-else large color="primary" @click="create = true"
+            >stwórz kolejną ankietę</v-btn
+          >
+        </div>
+        <div v-else>
           <v-row>
             <v-col cols="12" md="6">
               <div class="d-flex justify-end">
@@ -83,27 +99,30 @@
               <NewField :field="field" />
             </v-col>
           </v-row>
-        </v-card-text>
-        <v-card-actions>
-          <v-btn color="primary mb-5" @click="addFliedClick">Dodaj pole</v-btn>
-          <v-spacer></v-spacer>
-          <v-btn color="primary mb-5" @click="saveClick" :loading="loader"
-            >Utwórz ankietę</v-btn
-          >
-        </v-card-actions>
+          <div class="d-flex">
+            <v-btn color="primary mb-5" @click="addFliedClick"
+              >Dodaj pole</v-btn
+            >
+            <v-spacer></v-spacer>
+            <v-btn color="primary mb-5" @click="saveClick" :loading="loader"
+              >Utwórz ankietę</v-btn
+            >
+          </div>
+        </div>
       </div>
     </v-card>
-  </v-container>
+  </v-dialog>
 </template>
 
 <script>
 import NewField from "@/components/NewField";
-import { mapActions } from "vuex";
+import { mapGetters, mapActions } from "vuex";
 export default {
   components: {
     NewField,
   },
   data: () => ({
+    dialog: false,
     next: false,
     create: false,
     loader: false,
@@ -127,6 +146,7 @@ export default {
         "Nazwa zabiegu musi być krótsza niż 100 znaków",
     ],
   }),
+  computed: mapGetters(["getSurveyAlert"]),
   methods: {
     ...mapActions(["createSurvey"]),
     addFliedClick() {
@@ -173,14 +193,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.back {
-  height: 91vh;
-}
-.borderClass {
-  border-bottom: 3px solid #1976d2;
-  border-right: 3px solid #1976d2;
-  border-bottom-right-radius: 25px;
-}
-</style>

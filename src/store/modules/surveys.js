@@ -48,12 +48,14 @@ const actions = {
                 if(s.id === survey.id) {
                     s.completed = true
                     s.completedDate = new Date().toISOString().slice(0,10)
+                    s.fields = survey.fields;
                 }
             })
             await db.collection('patients').doc(rootState.login.user.uid).update({
                 surveys: surveys,
             })
             commit('surveySubmited', survey)
+            commit('patientSurveySubmited', survey)
 
             dispatch('throwSurveyAlert', {
                 text: 'Ankieta wysłana pomyślnie',
@@ -112,6 +114,7 @@ const mutations = {
     addPatientSurvey: (state, data) => state.patientSurveys.unshift(data),
     surveyCreated: (state, data) => state.surveys.unshift(data),
     surveySubmited: (state, data) => state.surveys.map((obj) => obj.id === data.id ? data : obj),
+    patientSurveySubmited: (state, data) => state.patientSurveys.map((obj) => obj.id === data.id ? data : obj),
 }
 
 export default {
