@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid class="home">
+  <v-container fluid>
     <v-card
       class="mx-auto mt-16"
       max-width="1100"
@@ -48,7 +48,4 @@ export default {
 </script>
 
 <style scoped>
-.home {
-  height: 90vh;
-}
 </style>

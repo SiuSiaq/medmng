@@ -58,6 +58,7 @@ export default {
     items: [
       { icon: "mdi-view-dashboard", text: "Home", route: "/" },
       { icon: "mdi-clipboard-list-outline", text: "Ankiety", route: "/surveys" },
+      { icon: "mdi-medical-bag", text: "Umówione zabiegi", route: "/appointments" },
       { icon: "mdi-needle", text: "Zabiegi", route: "/treatments" },
       { icon: "mdi-account", text: "Dane osobowe", route: "/personaldata" },
     ],
