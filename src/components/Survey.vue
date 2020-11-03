@@ -63,14 +63,12 @@
             }}
           </div>
           <div v-for="(field, i) in survey.fields" :key="i">
+            <div class="caption">{{i + 1  + ". " + field.name}}</div>
             <v-text-field
               outlined
               v-if="field.type === 'number'"
               :rules="[(v) => !!v || `Pole jest wymagane`]"
               type="number"
-              :label="
-                field.unit ? field.name + ' (' + field.unit + ')' : field.name
-              "
               :required="field.required"
               v-model="field.data"
             ></v-text-field>
@@ -78,14 +76,12 @@
               outlined
               v-else-if="field.type === 'text'"
               :rules="[(v) => !!v || `Pole jest wymagane`]"
-              :label="field.name"
               :required="field.required"
               v-model="field.data"
             ></v-text-field>
             <v-select
               outlined
               v-else-if="field.type === 'select'"
-              :label="field.name"
               :rules="[(v) => !!v || `Pole jest wymagane`]"
               :required="field.required"
               :items="field.options"
@@ -95,7 +91,6 @@
             <v-radio-group
               v-else-if="field.type === 'radio'"
               :required="field.required"
-              :label="field.name"
               v-model="field.data"
               :multiple="field.multiple"
               :rules="[(v) => !!v || `Pole jest wymagane`]"
@@ -104,13 +99,11 @@
                 v-for="(item, i) in field.options"
                 :key="i"
                 :value="item.text"
-                :label="item.text"
               ></v-radio>
             </v-radio-group>
             <v-radio-group
               v-else-if="field.type === 'truefalse'"
               :required="field.required"
-              :label="field.name"
               v-model="field.data"
               :rules="[(v) => !!v || `Pole jest wymagane`]"
             >
