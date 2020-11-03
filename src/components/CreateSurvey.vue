@@ -42,7 +42,7 @@
           >
         </div>
         <div v-else>
-          <v-row>
+          <v-row class="px-5">
             <v-col cols="12" md="6">
               <div class="d-flex justify-end">
                 <v-btn color="error" text @click="deleteSurveyClick"
@@ -99,7 +99,7 @@
               <NewField :field="field" />
             </v-col>
           </v-row>
-          <div class="d-flex">
+          <div class="d-flex px-5">
             <v-btn color="primary mb-5" @click="addFliedClick"
               >Dodaj pole</v-btn
             >
