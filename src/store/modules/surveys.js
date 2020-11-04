@@ -77,13 +77,13 @@ const actions = {
             const res = await db.collection('surveys').add(survey)
             survey.id = res.id
             commit('surveyCreated', survey)
-            dispatch('throwMainAlert', {
+            dispatch('throwSurveyAlert', {
                 text: 'Ankieta utworzona',
                 success: true,
             })
         } catch (error) {
             console.error(error)
-            dispatch('throwMainAlert', {
+            dispatch('throwSurveyAlert', {
                 text: 'Nie udało się utworzyć ankiety',
                 success: false,
             })

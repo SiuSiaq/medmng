@@ -6,6 +6,7 @@
         <v-spacer></v-spacer>
         <v-autocomplete
           label="Szukaj"
+          no-data-text="Brak umówionych zabiegów"
           append-outer-icon="mdi-magnify"
           class="mr-3"
           item-text="name"

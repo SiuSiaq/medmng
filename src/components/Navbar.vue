@@ -17,7 +17,7 @@
       <v-list nav>
         <v-list-item-group>
           <v-list-item
-            v-for="item in items"
+            v-for="item in getUserData.doctor ? itemsDoctor : items"
             :key="item.text"
             router
             :to="item.route"
@@ -57,6 +57,10 @@ export default {
     settings: "/settings",
     items: [
       { icon: "mdi-view-dashboard", text: "Home", route: "/" },
+      { icon: "mdi-account", text: "Dane osobowe", route: "/personaldata" },
+    ],
+    itemsDoctor: [
+      { icon: "mdi-view-dashboard", text: "Home", route: "/" },
       { icon: "mdi-clipboard-list-outline", text: "Ankiety", route: "/surveys" },
       { icon: "mdi-medical-bag", text: "Umówione zabiegi", route: "/appointments" },
       { icon: "mdi-needle", text: "Zabiegi", route: "/treatments" },
@@ -71,7 +75,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(["getIsLoggedIn"]),
+    ...mapGetters(["getIsLoggedIn", 'getUserData']),
   },
 };
 </script>

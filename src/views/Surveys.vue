@@ -3,7 +3,6 @@
     <v-card
       class="mx-auto mt-16"
       max-width="1100"
-      :min-height="!$vuetify.breakpoint.mobile ? '400' : '500'"
       elevation="24"
       rounded="xl"
     >
@@ -11,6 +10,7 @@
         >Ankiety do wysłania
         <v-spacer></v-spacer>
         <v-autocomplete
+          no-data-text="Brak ankiet"
           label="Szukaj"
           append-outer-icon="mdi-magnify"
           class="mr-3"
@@ -20,7 +20,7 @@
           clearable
         ></v-autocomplete
       ></v-card-title>
-      <v-card-text>
+      <v-card-text style="min-height: 300px">
         <v-list three-line>
           <v-list-item-group>
             <Survey
@@ -46,7 +46,7 @@ import Survey from "@/components/Survey";
 import CreateSurvey from "@/components/CreateSurvey";
 export default {
   methods: {
-    ...mapActions(["fetchSurveys", 'fetchPatients']),
+    ...mapActions(["fetchSurveys", "fetchPatients"]),
   },
   computed: {
     ...mapGetters(["getSurveys"]),

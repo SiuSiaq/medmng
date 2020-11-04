@@ -14,10 +14,8 @@
         <v-list-item-content>
           <v-list-item-title>{{ appointment.name }}</v-list-item-title>
           <v-list-item-subtitle
-            >{{ appointment.date.toDate().toISOString().slice(0,10) }}<br />
-            {{
-              appointment.patient
-            }}</v-list-item-subtitle
+            >{{ appointment.date.toDate().toISOString().slice(0, 10) }}<br />
+            {{ appointment.patient }}</v-list-item-subtitle
           >
         </v-list-item-content>
       </v-list-item>
@@ -39,19 +37,32 @@
       >
         {{ getSurveyAlert.text }}
       </v-alert>
+      <div class="mt-15 px-3 mx-auto" style="max-width: 600px">
+        <div class="caption">Pacjent</div>
+        <div class="mb-2">{{appointment.patient}}</div>
+        <div class="caption">Zabieg</div>
+        <div class="mb-2">{{appointment.name}}</div>
+        <div class="caption">Termin</div>
+        <div class="mb-6">{{appointment.date.toDate().toISOString().slice(0,10)}}</div>
+        <div class="d-flex">
+          <v-btn color="error" text>usuń</v-btn>
+          <v-spacer></v-spacer>
+          <v-btn color="primary" @click="dialog = false">zamknij</v-btn>
+        </div>
+      </div>
     </v-card>
   </v-dialog>
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters } from "vuex";
 export default {
-    props: ['appointment'],
-    data: () => ({
-        dialog: false,
-    }),
-    computed: {
-        ...mapGetters(['getSurveyAlert']),
-    }
-}
+  props: ["appointment"],
+  data: () => ({
+    dialog: false,
+  }),
+  computed: {
+    ...mapGetters(["getSurveyAlert"]),
+  },
+};
 </script>
