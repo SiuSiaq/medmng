@@ -3,14 +3,13 @@
     <v-card
       class="mx-auto mt-16"
       max-width="1100"
-      :min-height="!$vuetify.breakpoint.mobile ? '400' : '500'"
       elevation="24"
       rounded="xl"
     >
       <v-card-title class="text-h4 grey--text text--darken-2"
         >Ankiety</v-card-title
       >
-      <v-card-text>
+      <v-card-text style="min-height: 300px">
         <v-list two-line>
           <v-list-item-group>
             <v-subheader>Do wypełnienia</v-subheader>
