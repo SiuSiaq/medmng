@@ -112,9 +112,6 @@
             </v-radio-group>
           </div>
           <div class="d-flex">
-            <v-btn text color="primary" v-if="sendable">
-              Dodaj do zabiegu
-            </v-btn>
             <v-spacer></v-spacer>
             <SendSurvey :survey="survey" v-if="sendable" />
             <v-btn
