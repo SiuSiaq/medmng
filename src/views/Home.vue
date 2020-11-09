@@ -15,7 +15,6 @@
             <v-subheader>Do wypełnienia</v-subheader>
             <div class="text-subtitle-1 ml-5" v-if="getIncompletedPatientSurveys.length === 0">Brak ankiet do wypełnienia</div>
             <Survey v-for="survey in getIncompletedPatientSurveys" :key="survey.id" :survey="survey"/>
-            <v-divider inset v-if="getIncompletedPatientSurveys.length > 0 && getCompletedPatientSurveys.length > 0"></v-divider>
             <v-subheader>Wypełnione</v-subheader>
             <div class="text-subtitle-1 ml-5" v-if="getCompletedPatientSurveys.length === 0">Brak wypełnionych ankiet</div>
             <Survey v-for="survey in getCompletedPatientSurveys" :key="survey.id" :survey="survey"/>
