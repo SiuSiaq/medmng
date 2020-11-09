@@ -44,7 +44,7 @@ export default {
 }
 .slide-enter-active,
 .slide-leave-active {
-  transition: opacity 1s, transform 1s;
+  transition: opacity 0.75s, transform 0.75s;
 }
 .slide-enter,
 .slide-leave-to {
