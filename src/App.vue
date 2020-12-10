@@ -11,9 +11,7 @@
       >
         {{ getMainAlert.text }}
       </v-alert>
-      <transition name="slide" mode="out-in">
-        <router-view></router-view>
-      </transition>
+      <router-view></router-view>
     </v-main>
   </v-app>
 </template>
@@ -38,17 +36,8 @@ export default {
 };
 </script>
 
-<style scoped>
-.appstyle {
-  background: #1976d2;
-}
-.slide-enter-active,
-.slide-leave-active {
-  transition: opacity 0.75s, transform 0.75s;
-}
-.slide-enter,
-.slide-leave-to {
-  opacity: 0;
-  transform: translateX(-30%);
-}
+<style>
+  .appstyle {
+    background: #1976d2;
+  }
 </style>

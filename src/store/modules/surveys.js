@@ -1,4 +1,4 @@
-import { db, fieldValue } from "@/main"
+import { db } from "@/main"
 const state = {
     surveys: [],
     patientSurveys: [],
@@ -32,9 +32,15 @@ const actions = {
                 console.log('No user')
                 return
             }
-            let res = await db.collection('patients').doc(rootState.login.user.uid).get()
-            let doc = res.data()
-            commit('setPatientSurveys', doc.surveys)
+            let surveys = []
+            let res = await db.collection('patients').doc(rootState.login.user.uid).collection('surveys').get()
+            res.forEach(doc => {
+                surveys.push({
+                    ...doc.data(),
+                    id: doc.id,
+                })
+            })
+            commit('setPatientSurveys', surveys)
         } catch (error) {
             console.error(error)
         }
@@ -42,18 +48,33 @@ const actions = {
     async submitSurvey({ commit, rootState, dispatch }, survey) {
         try {
             survey.completed = true
-            const res = await db.collection('patients').doc(rootState.login.user.uid).get()
-            let surveys = res.data().surveys
-            surveys.forEach((s) => {
-                if(s.id === survey.id) {
-                    s.completed = true
-                    s.completedDate = new Date().toISOString().slice(0,10)
-                    s.fields = survey.fields;
-                }
+            // const res = await db.collection('patients').doc(rootState.login.user.uid).collection('surveys').get()
+            // let surveys = res.data().surveys
+            // surveys.forEach((s) => {
+            //     if(s.id === survey.id) {
+            //         s.completed = true
+            //         s.completedDate = new Date().toISOString().slice(0,10)
+            //         s.fields = survey.fields;
+            //     }
+            // })
+            const batch = db.batch();
+
+            const patientSurveyRef = db.collection('patients').doc(rootState.login.user.uid).collection('surveys').doc(survey.id);
+            const surveyRef = db.collection('surveys').doc(survey.surveyId).collection('completedSurveys').doc();
+            
+
+            batch.update(patientSurveyRef ,{
+                completed: true,
+                fields: survey.fields,
             })
-            await db.collection('patients').doc(rootState.login.user.uid).update({
-                surveys: surveys,
+
+            batch.set(surveyRef, {
+                data: survey.fields.map(v => v.data),
+                submited: new Date(),
             })
+
+            await batch.commit();
+
             commit('surveySubmited', survey)
             commit('patientSurveySubmited', survey)
 
@@ -91,8 +112,12 @@ const actions = {
     },
     async sendSurvey({ dispatch }, payload) {
         try {
-            await db.collection('patients').doc(payload.id).update({
+            /*await db.collection('patients').doc(payload.id).update({
                 surveys: fieldValue.arrayUnion(payload.survey)
+            })*/
+            await db.collection('patients').doc(payload.id).collection('surveys').add({
+                ...payload.survey,
+                surveyId: payload.survey.id,
             })
             dispatch('throwSurveyAlert', {
                 text: 'Ankieta pomyślnie wysłana do pacjent',
