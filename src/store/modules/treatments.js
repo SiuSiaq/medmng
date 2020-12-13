@@ -9,27 +9,30 @@ const getters = {
 
 const actions = {
     async fetchTreatments({ commit }) {
-        try {
-            const res = await db.collection('treatments').get()
-            let treatments = []
-            res.forEach(doc => {
-                let treatment = doc.data()
-                treatment.id = doc.id
-                treatments.push(treatment)
+        db.collection('treatments')
+            .onSnapshot(snapshot => {
+                snapshot.docChanges().forEach(change => {
+                    if (change.type === 'added') {
+                        commit('treatmentCreated', {
+                            ...change.doc.data(),
+                            id: change.doc.id,
+                        });
+                    }
+                    if (change.type === 'modified') {
+                        console.log('Modified treatment: ', change.doc.data());
+                    }
+                    if (change.type === 'removed') {
+                        commit('treatmentRemoved', change.doc.id)
+                    }
+                });
             });
-            commit('setTreatments', treatments)
-        } catch (error) {
-            console.error(error)
-        }
     },
-    async createTreatment({ commit, rootState, dispatch }, treatment) {
+    async createTreatment({ rootState, dispatch }, treatment) {
         try {
             treatment.authorName = rootState.login.userData.fullname
             treatment.authorRef = db.collection('patients').doc(rootState.login.userData.uid)
             treatment.created = new Date()
-            const res = await db.collection('treatments').add(treatment)
-            treatment.id = res.id
-            commit('treatmentCreated', treatment)
+            await db.collection('treatments').add(treatment)
             dispatch('throwSurveyAlert', {
                 text: 'Zabieg został utworzony',
                 success: true,
@@ -47,6 +50,7 @@ const actions = {
 const mutations = {
     setTreatments: (state, data) => state.treatments = data,
     treatmentCreated: (state, data) => state.treatments.unshift(data),
+    treatmentRemoved: (state, id) => state.treatments = state.treatments.filter(v => v.id !== id),
 }
 
 export default {

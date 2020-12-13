@@ -17,9 +17,10 @@ const actions = {
             let temp = []
             let res = await db.collection('surveys').get()
             res.forEach(doc => {
-                let survey = doc.data()
-                survey.id = doc.id
-                temp.push(survey)
+                temp.push({
+                    ...doc.data(),
+                    id: doc.id,
+                })
             });
             commit('setSurveys', temp)
         } catch (error) {
@@ -48,28 +49,24 @@ const actions = {
     async submitSurvey({ commit, rootState, dispatch }, survey) {
         try {
             survey.completed = true
-            // const res = await db.collection('patients').doc(rootState.login.user.uid).collection('surveys').get()
-            // let surveys = res.data().surveys
-            // surveys.forEach((s) => {
-            //     if(s.id === survey.id) {
-            //         s.completed = true
-            //         s.completedDate = new Date().toISOString().slice(0,10)
-            //         s.fields = survey.fields;
-            //     }
-            // })
             const batch = db.batch();
 
             const patientSurveyRef = db.collection('patients').doc(rootState.login.user.uid).collection('surveys').doc(survey.id);
             const surveyRef = db.collection('surveys').doc(survey.surveyId).collection('completedSurveys').doc();
-            
 
-            batch.update(patientSurveyRef ,{
+
+            batch.update(patientSurveyRef, {
                 completed: true,
                 fields: survey.fields,
             })
 
+            let data = {}
+            survey.fields.forEach(v => {
+                data[v.columnName] = v.data
+            })
+
             batch.set(surveyRef, {
-                data: survey.fields.map(v => v.data),
+                data,
                 submited: new Date(),
             })
 
@@ -112,9 +109,6 @@ const actions = {
     },
     async sendSurvey({ dispatch }, payload) {
         try {
-            /*await db.collection('patients').doc(payload.id).update({
-                surveys: fieldValue.arrayUnion(payload.survey)
-            })*/
             await db.collection('patients').doc(payload.id).collection('surveys').add({
                 ...payload.survey,
                 surveyId: payload.survey.id,
@@ -131,6 +125,20 @@ const actions = {
             })
         }
     },
+    async downloadSurvey({ dispatch }, id) {
+        let data = []
+        const res = await db.collection('surveys').doc(id).collection('completedSurveys').get()
+        res.forEach(doc => {
+            data.push(
+                doc.data().data
+            )
+        })
+        dispatch('throwMainAlert', {
+            text: 'Pomyślnie przygotowano dane do pobrania',
+            success: true,
+        })
+        return data
+    }
 }
 
 const mutations = {

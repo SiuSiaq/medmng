@@ -37,17 +37,11 @@
 <script>
 import Treatment from "@/components/Treatment";
 import CreateTreatment from "@/components/CreateTreatment";
-import { mapActions, mapGetters } from "vuex";
+import { mapGetters } from "vuex";
 export default {
   components: {
     Treatment,
     CreateTreatment,
-  },
-  methods: {
-    ...mapActions(["fetchPatients", "fetchSurveys", "fetchTreatments"]),
-  },
-  mounted() {
-    this.fetchTreatments();
   },
   computed: {
     ...mapGetters(["getTreatments"]),

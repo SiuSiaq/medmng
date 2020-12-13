@@ -96,7 +96,7 @@
               >
                 <v-btn color="error" text>Usuń pole</v-btn>
               </div>
-              <NewField :field="field" />
+              <NewField :field="field" :number="i"/>
             </v-col>
           </v-row>
           <div class="d-flex px-5">

@@ -52,7 +52,8 @@
                 v-model="treatment.description"
                 auto-grow
                 clearable
-                label="Opis zabiegu (opcjonalny)"
+                label="Opis zabiegu"
+                required
               >
               </v-textarea>
             </div>
@@ -194,7 +195,6 @@ export default {
           this.treatment.doctorAfter.push({ name: el.name, id: el.id });
         });
       }
-      if(!this.treatment.description) this.treatment.description = '';
       await this.createTreatment(this.treatment);
       this.loader = false;
       this.$refs.form.reset();

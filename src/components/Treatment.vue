@@ -14,10 +14,15 @@
         <v-list-item-content>
           <v-list-item-title>{{ treatment.name }}</v-list-item-title>
           <v-list-item-subtitle
-            >{{ treatment.created.toDate().toISOString().slice(0,10) }}<br />
-            {{
-              treatment.description.length > 0 ? treatment.description : "Brak opisu"
-            }}</v-list-item-subtitle
+            >{{
+              treatment.created instanceof Date
+                ? treatment.created.toISOString().slice(0, 10)
+                : treatment.created
+                    .toDate()
+                    .toISOString()
+                    .slice(0, 10)
+            }}<br />
+            {{ treatment.description.length > 0 ? treatment.description : 'Brak opisu'}}</v-list-item-subtitle
           >
         </v-list-item-content>
       </v-list-item>
@@ -49,11 +54,7 @@
             <div>{{ treatment.name }}</div>
             <div class="mt-2 caption">Opis</div>
             <div>
-              {{
-                treatment.description.length > 0
-                  ? treatment.description
-                  : "Brak opisu"
-              }}
+              {{ treatment.description }}
             </div>
           </div>
         </v-col>
@@ -64,18 +65,28 @@
           <v-list>
             <v-list-item-group>
               <v-subheader>Przed zabiegiem</v-subheader>
-              <v-list-item v-for="survey in treatment.patientBefore" :key="survey.id">
+              <v-list-item
+                v-for="survey in treatment.patientBefore"
+                :key="survey.id"
+              >
                 <v-list-item-avatar>
-                  <v-icon class="warning white--text"> mdi-clipboard-outline </v-icon>
+                  <v-icon class="warning white--text">
+                    mdi-clipboard-outline
+                  </v-icon>
                 </v-list-item-avatar>
                 <v-list-item-content>
                   <v-list-item-title>{{ survey.name }}</v-list-item-title>
                 </v-list-item-content>
               </v-list-item>
               <v-subheader>Po zabiegu</v-subheader>
-              <v-list-item v-for="survey in treatment.patientAfter" :key="survey.id">
+              <v-list-item
+                v-for="survey in treatment.patientAfter"
+                :key="survey.id"
+              >
                 <v-list-item-avatar>
-                  <v-icon class="warning white--text"> mdi-clipboard-outline </v-icon>
+                  <v-icon class="warning white--text">
+                    mdi-clipboard-outline
+                  </v-icon>
                 </v-list-item-avatar>
                 <v-list-item-content>
                   <v-list-item-title>{{ survey.name }}</v-list-item-title>
@@ -91,18 +102,28 @@
           <v-list>
             <v-list-item-group>
               <v-subheader>Przed zabiegiem</v-subheader>
-              <v-list-item v-for="survey in treatment.doctorBefore" :key="survey.id">
+              <v-list-item
+                v-for="survey in treatment.doctorBefore"
+                :key="survey.id"
+              >
                 <v-list-item-avatar>
-                  <v-icon class="warning white--text"> mdi-clipboard-outline </v-icon>
+                  <v-icon class="warning white--text">
+                    mdi-clipboard-outline
+                  </v-icon>
                 </v-list-item-avatar>
                 <v-list-item-content>
                   <v-list-item-title>{{ survey.name }}</v-list-item-title>
                 </v-list-item-content>
               </v-list-item>
               <v-subheader>Po zabiegu</v-subheader>
-              <v-list-item v-for="survey in treatment.doctorAfter" :key="survey.id">
+              <v-list-item
+                v-for="survey in treatment.doctorAfter"
+                :key="survey.id"
+              >
                 <v-list-item-avatar>
-                  <v-icon class="warning white--text"> mdi-clipboard-outline </v-icon>
+                  <v-icon class="warning white--text">
+                    mdi-clipboard-outline
+                  </v-icon>
                 </v-list-item-avatar>
                 <v-list-item-content>
                   <v-list-item-title>{{ survey.name }}</v-list-item-title>
@@ -123,6 +144,6 @@ export default {
     dialog: false,
   }),
   computed: mapGetters(["getSurveyAlert"]),
-  props: ['treatment'],
+  props: ["treatment"],
 };
 </script>

@@ -70,7 +70,7 @@ const actions = {
         console.log("logged out");
         return;
     },
-    authStateChanged({ commit }) {
+    authStateChanged({ commit, dispatch }) {
         auth.onAuthStateChanged(async (user) => {
             if (user) {
                 // User is signed in.
@@ -80,6 +80,9 @@ const actions = {
                 let userData = tmp.data();
                 userData.uid = tmp.id;
                 commit('setUserData', userData);
+                if(userData.doctor) {
+                    dispatch('fetchTreatments');
+                }
 
                 /*var email = user.email;
                 var uid = user.uid;

@@ -9,7 +9,10 @@
     <template v-slot:activator="{ on, attrs }">
       <v-list-item v-bind="attrs" v-on="on">
         <v-list-item-avatar>
-          <v-icon :class="survey.completed ? 'success' : 'warning'" class="white--text">
+          <v-icon
+            :class="survey.completed ? 'success' : 'warning'"
+            class="white--text"
+          >
             {{
               survey.completed
                 ? "mdi-clipboard-check-outline"
@@ -63,7 +66,7 @@
             }}
           </div>
           <div v-for="(field, i) in survey.fields" :key="i">
-            <div class="caption">{{i + 1  + ". " + field.name}}</div>
+            <div class="caption">{{ i + 1 + ". " + field.name }}</div>
             <v-text-field
               outlined
               v-if="field.type === 'number'"
@@ -112,6 +115,13 @@
             </v-radio-group>
           </div>
           <div class="d-flex">
+            <v-btn
+              v-if="getUserData.doctor && sendable"
+              color="primary"
+              :loading="downloadLoader"
+              @click="downloadClick"
+              >Pobierz</v-btn
+            >
             <v-spacer></v-spacer>
             <SendSurvey :survey="survey" v-if="sendable" />
             <v-btn
@@ -139,10 +149,11 @@ export default {
   data: () => ({
     dialog: false,
     loader: false,
+    downloadLoader: false,
     valid: true,
   }),
   methods: {
-    ...mapActions(["submitSurvey"]),
+    ...mapActions(["submitSurvey", 'downloadSurvey']),
     async submitClick() {
       if (!this.$refs.form.validate()) return;
       this.loader = true;
@@ -152,8 +163,38 @@ export default {
     reset() {
       this.$refs.form.reset();
     },
+    async downloadClick() {
+      this.downloadLoader = true;
+      let surveysData = await this.downloadSurvey(this.survey.id);
+      const data = JSON.stringify(surveysData);
+      const blob = new Blob([data], { type: "text/plain" });
+      const e = document.createEvent("MouseEvents"),
+        a = document.createElement("a");
+      a.download = "test.json";
+      a.href = window.URL.createObjectURL(blob);
+      a.dataset.downloadurl = ["text/json", a.download, a.href].join(":");
+      this.downloadLoader = false;
+      e.initEvent(
+        "click",
+        true,
+        false,
+        window,
+        0,
+        0,
+        0,
+        0,
+        0,
+        false,
+        false,
+        false,
+        false,
+        0,
+        null
+      );
+      a.dispatchEvent(e);
+    },
   },
-  computed: mapGetters(['getSurveyAlert']),
+  computed: mapGetters(["getSurveyAlert", "getUserData"]),
   components: {
     SendSurvey,
   },

@@ -7,7 +7,16 @@
         v-model="field.name"
         :counter="250"
         :rules="nameRules"
-        label="Nazwa pola"
+        :label="question"
+        required
+      ></v-text-field>
+      <v-text-field
+        outlined
+        class="mb-2"
+        v-model="field.columnName"
+        :counter="250"
+        :rules="columnNameRules"
+        label="Nazwa kolumny"
         required
       ></v-text-field>
       <v-textarea
@@ -50,13 +59,18 @@
 
 <script>
 export default {
-  props: ['field'],
+  props: ['field', 'number'],
   data: () => ({
     name: "",
     nameRules: [
       (v) => !!v || "Nazwa pola jest wymagana",
       (v) =>
         (v && v.length <= 250) || "Nazwa pola musi być krótsza niż 250 znaków",
+    ],
+    columnName: '',
+    columnNameRules: [
+      (v) =>
+        (v.length <= 250) || "Nazwa kolumny musi być krótsza niż 250 znaków",
     ],
     description: "",
     type: 1,
@@ -92,6 +106,11 @@ export default {
     type(val) {
       this.field.type = this.types[val - 1].text
     },
+  },
+  computed: {
+    question() {
+      return `Pytanie ${this.number + 1}`
+    }
   }
 };
 </script>
