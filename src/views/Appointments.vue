@@ -35,7 +35,7 @@ import Appointment from "@/components/Appointment";
 import { mapActions, mapGetters } from 'vuex';
 export default {
   methods: {
-    ...mapActions(["fetchPatients", 'fetchTreatments', 'fetchAppointments']),
+    ...mapActions(['fetchAppointments']),
   },
   components: {
     CreateAppointment,
@@ -45,8 +45,6 @@ export default {
       ...mapGetters(['getAppointments']),
   },
   mounted() {
-    this.fetchPatients();
-    this.fetchTreatments();
     this.fetchAppointments();
   },
 };

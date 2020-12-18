@@ -46,7 +46,7 @@ import Survey from "@/components/Survey";
 import CreateSurvey from "@/components/CreateSurvey";
 export default {
   methods: {
-    ...mapActions(["fetchSurveys", "fetchPatients"]),
+    ...mapActions(["fetchSurveys"]),
   },
   computed: {
     ...mapGetters(["getSurveys"]),
@@ -57,7 +57,6 @@ export default {
   },
   mounted() {
     this.fetchSurveys();
-    this.fetchPatients();
   },
 };
 </script>

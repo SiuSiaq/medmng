@@ -77,11 +77,14 @@ const actions = {
                 commit('setIsLoggedIn', true);
                 commit('setUser', user);
                 let tmp = await db.collection('patients').doc(user.uid).get();
-                let userData = tmp.data();
-                userData.uid = tmp.id;
+                let userData = {
+                    ...tmp.data(),
+                    uid: tmp.id,
+                }
                 commit('setUserData', userData);
-                if(userData.doctor) {
+                if (userData.doctor) {
                     dispatch('fetchTreatments');
+                    dispatch('fetchPatients');
                 }
 
                 /*var email = user.email;

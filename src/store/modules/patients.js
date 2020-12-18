@@ -9,24 +9,59 @@ const getters = {
 }
 
 const actions = {
-    async fetchPatients({commit}) {
+    async fetchPatients({ commit }) {
+        db.collection('patients')
+            .onSnapshot(snapshot => {
+                snapshot.docChanges().forEach(change => {
+                    if (change.type === 'added') {
+                        commit('patientAdded', {
+                            ...change.doc.data(),
+                            id: change.doc.id,
+                        });
+                    }
+                    if (change.type === 'modified') {
+                        console.log('Modified patient: ', change.doc.data());
+                    }
+                    if (change.type === 'removed') {
+                        commit('patientRemoved', change.doc.id)
+                    }
+                });
+            });
+    },
+    async fetchPatientDataSurveys({ dispatch }, id) {
         try {
-            let patients = []
-            let res = await db.collection('patients').get()
-            res.forEach(doc => {
-                let patient = doc.data()
-                patient.id = doc.id
-                patients.push(patient)
+            let completed = [], incompleted = [];
+            const resCompleted = await db.collection('patients').doc(id).collection('surveys').where('completed', '==', true).get();
+            resCompleted.forEach(doc => {
+                completed.push({
+                    ...doc.data(),
+                    id: doc.id,
+                })
             })
-            commit('setPatients', patients)
+
+            const resIncompleted = await db.collection('patients').doc(id).collection('surveys').where('completed', '==', false).get();
+            resIncompleted.forEach(doc => {
+                incompleted.push({
+                    ...doc.data(),
+                    id: doc.id,
+                })
+            })
+
+            return { completed, incompleted }
         } catch (error) {
             console.error(error)
+            dispatch('throwMainAlert', {
+                text: 'Nie udało się pobrać ankiet pacjenta',
+                success: false,
+            })
         }
-    },
+    }
 }
 
 const mutations = {
     setPatients: (state, data) => state.patients = data,
+    patientAdded: (state, data) => state.patients.push(data),
+    patientRemoved: (state, id) => state.patients = state.patients.filter(v => v.id !== id),
 }
 
 export default {

@@ -7,6 +7,7 @@ import CreateSurvey from '@/views/CreateSurvey'
 import Person from '@/views/Person'
 import Treatments from '@/views/Treatments'
 import Appointments from '@/views/Appointments'
+import Patients from '@/views/Patients'
 import Login from '@/views/Login'
 import Register from '@/views/Register'
 
@@ -57,6 +58,14 @@ const routes = [
     path: '/appointments',
     name: 'Appointments',
     component: Appointments,
+    meta: {
+      requiresAuth: true,
+    },
+  },
+  {
+    path: '/patients',
+    name: 'Patients',
+    component: Patients,
     meta: {
       requiresAuth: true,
     },
