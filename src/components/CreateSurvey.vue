@@ -92,9 +92,8 @@
             >
               <div
                 class="d-flex justify-end"
-                @click="survey.fields.splice(i, 1)"
               >
-                <v-btn color="error" text>Usuń pole</v-btn>
+                <v-btn color="error" text @click="survey.fields.splice(i, 1)">Usuń pole</v-btn>
               </div>
               <NewField :field="field" :number="i"/>
             </v-col>

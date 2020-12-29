@@ -14,15 +14,26 @@ const getters = {
 const actions = {
     async fetchSurveys({ commit }) {
         try {
-            let temp = []
-            let res = await db.collection('surveys').get()
-            res.forEach(doc => {
-                temp.push({
-                    ...doc.data(),
-                    id: doc.id,
-                })
-            });
-            commit('setSurveys', temp)
+            db.collection('surveys')
+                .onSnapshot(snapshot => {
+                    snapshot.docChanges().forEach(change => {
+                        if (change.type === 'added') {
+                            commit('surveyAdded', {
+                                ...change.doc.data(),
+                                id: change.doc.id,
+                            });
+                        }
+                        if (change.type === 'modified') {
+                            commit('surveyModified', {
+                                ...change.doc.data(),
+                                id: change.doc.id,
+                            });
+                        }
+                        if (change.type === 'removed') {
+                            commit('surveyRemoved', change.doc.id)
+                        }
+                    });
+                });
         } catch (error) {
             console.error(error)
         }
@@ -33,20 +44,31 @@ const actions = {
                 console.log('No user')
                 return
             }
-            let surveys = []
-            let res = await db.collection('patients').doc(rootState.login.user.uid).collection('surveys').get()
-            res.forEach(doc => {
-                surveys.push({
-                    ...doc.data(),
-                    id: doc.id,
-                })
-            })
-            commit('setPatientSurveys', surveys)
+            db.collection('patients').doc(rootState.login.user.uid).collection('surveys')
+                .onSnapshot(snapshot => {
+                    snapshot.docChanges().forEach(change => {
+                        if (change.type === 'added') {
+                            commit('patientSurveyAdded', {
+                                ...change.doc.data(),
+                                id: change.doc.id,
+                            });
+                        }
+                        if (change.type === 'modified') {
+                            commit('patientSurveyModified', {
+                                ...change.doc.data(),
+                                id: change.doc.id,
+                            });
+                        }
+                        if (change.type === 'removed') {
+                            commit('patientSurveyRemoved', change.doc.id)
+                        }
+                    });
+                });
         } catch (error) {
             console.error(error)
         }
     },
-    async submitSurvey({ commit, rootState, dispatch }, survey) {
+    async submitSurvey({ rootState, dispatch }, survey) {
         try {
             survey.completed = true
             const batch = db.batch();
@@ -72,9 +94,6 @@ const actions = {
 
             await batch.commit();
 
-            commit('surveySubmited', survey)
-            commit('patientSurveySubmited', survey)
-
             dispatch('throwSurveyAlert', {
                 text: 'Ankieta wysłana pomyślnie',
                 success: true,
@@ -87,14 +106,13 @@ const actions = {
             })
         }
     },
-    async createSurvey({ commit, rootState, dispatch }, survey) {
+    async createSurvey({ rootState, dispatch }, survey) {
         try {
             survey.date = new Date().toISOString().slice(0, 10)
             survey.author = db.collection('patients').doc(rootState.login.user.uid)
             survey.completed = false
             const res = await db.collection('surveys').add(survey)
             survey.id = res.id
-            commit('surveyCreated', survey)
             dispatch('throwSurveyAlert', {
                 text: 'Ankieta utworzona',
                 success: true,
@@ -142,11 +160,12 @@ const actions = {
 }
 
 const mutations = {
-    setSurveys: (state, data) => state.surveys = data,
-    setPatientSurveys: (state, data) => state.patientSurveys = data,
-    addPatientSurvey: (state, data) => state.patientSurveys.unshift(data),
-    surveyCreated: (state, data) => state.surveys.unshift(data),
-    surveySubmited: (state, data) => state.surveys.map((obj) => obj.id === data.id ? data : obj),
+    patientSurveyAdded: (state, data) => state.patientSurveys.unshift(data),
+    patientSurveyRemoved: (state, id) => state.patientSurveys = state.patientSurveys.filter(v => v.id !== id),
+    patientSurveyModified: (state, data) => state.patientSurveys.map((obj) => obj.id === data.id ? data : obj),
+    surveyAdded: (state, data) => state.surveys.unshift(data),
+    surveyRemoved: (state, id) => state.surveys = state.surveys.filter(v => v.id !== id),
+    surveyModified: (state, data) => state.surveys.map((obj) => obj.id === data.id ? data : obj),
     patientSurveySubmited: (state, data) => state.patientSurveys.map((obj) => obj.id === data.id ? data : obj),
 }
 

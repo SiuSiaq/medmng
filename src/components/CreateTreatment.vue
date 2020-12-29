@@ -163,7 +163,7 @@ export default {
     ],
   }),
   methods: {
-    ...mapActions(["fetchSurveys", "createTreatment"]),
+    ...mapActions(["createTreatment"]),
     async createTreatmentClick() {
       if(!this.$refs.form.validate()) return;
       this.loader = true;
@@ -202,9 +202,6 @@ export default {
         this.dialog = false;
       }, 1500);
     },
-  },
-  mounted() {
-    this.fetchSurveys();
   },
 };
 </script>

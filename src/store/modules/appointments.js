@@ -11,19 +11,28 @@ const getters = {
 const actions = {
     async fetchAppointments({commit}) {
         try {
-            let appointments = []
-            let res = await db.collection('appointments').get()
-            res.forEach(doc => {
-                let appointment = doc.data()
-                appointment.id = doc.id
-                appointments.push(appointment)
-            })
-            commit('setAppointments', appointments)
+            db.collection('appointments')
+            .onSnapshot(snapshot => {
+                snapshot.docChanges().forEach(change => {
+                    if (change.type === 'added') {
+                        commit('appointmentAdded', {
+                            ...change.doc.data(),
+                            id: change.doc.id,
+                        });
+                    }
+                    if (change.type === 'modified') {
+                        console.log('Modified appointment: ', change.doc.data());
+                    }
+                    if (change.type === 'removed') {
+                        commit('appointmentRemoved', change.doc.id)
+                    }
+                });
+            });
         } catch (error) {
             console.error(error)
         }
     },
-    async addAppointment({commit, dispatch}, appointment) {
+    async addAppointment({ dispatch }, appointment) {
         try {
             appointment.created = new Date()
             appointment.date = new Date(appointment.date)
@@ -31,7 +40,6 @@ const actions = {
             appointment.treatmentRef = db.collection('treatments').doc(appointment.treatmentRef)
             const res = await db.collection('appointments').add(appointment)
             appointment.id = res.id
-            commit('appointmentCreated', appointment)
             dispatch('throwSurveyAlert', {
                 text: 'Umówiono zabieg',
                 success: true,
@@ -48,7 +56,8 @@ const actions = {
 
 const mutations = {
     setAppointments: (state, data) => state.appointments = data,
-    appointmentCreated: (state, data) => state.appointments.unshift(data),
+    appointmentAdded: (state, data) => state.appointments.unshift(data),
+    appointmentRemoved: (state, id) => state.appointments = state.appointments.filter( v => v.id !== id),
 }
 
 export default {

@@ -85,6 +85,9 @@ const actions = {
                 if (userData.doctor) {
                     dispatch('fetchTreatments');
                     dispatch('fetchPatients');
+                    dispatch('fetchSurveys');
+                    dispatch('fetchPatientSurveys');
+                    dispatch('fetchAppointments');
                 }
 
                 /*var email = user.email;

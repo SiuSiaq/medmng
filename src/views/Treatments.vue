@@ -1,50 +1,170 @@
 <template>
-  <v-container fluid class="surveys">
-    <v-card class="mx-auto mt-16" max-width="1100" elevation="24" rounded="xl">
-      <v-card-title class="grey--text text--darken-2"
-        >Zabiegi
-        <v-spacer></v-spacer>
-        <v-autocomplete
-          no-data-text="Brak zabiegów"
-          label="Szukaj"
-          append-outer-icon="mdi-magnify"
-          class="mr-3"
-          item-text="name"
-          item-value="id"
-          clearable
-        ></v-autocomplete
-      ></v-card-title>
-      <v-card-text style="min-height: 300px">
-        <v-list three-line>
-          <v-list-item-group>
-            <Treatment
-              v-for="treatment in getTreatments"
-              :key="treatment.id"
-              :treatment="treatment"
-            />
-          </v-list-item-group>
-        </v-list>
-      </v-card-text>
+  <v-container fluid :class="$vuetify.breakpoint.mobile ? 'pa-0' : ''">
+    <v-row no-gutters v-if="!$vuetify.breakpoint.mobile" style="height: 100%">
+      <v-col cols="12" md="3">
+        <v-card class="px-4 pt-2" rounded="lg" height="100%">
+          <v-autocomplete
+            no-data-text="Brak zabiegów w bazie danych"
+            @change="searchSelect"
+            offset-y
+            v-model="searchTreatmentId"
+            :items="getTreatments"
+            item-text="name"
+            item-value="id"
+            label="Zabieg"
+            prepend-icon="mdi-account-search-outline"
+          ></v-autocomplete>
+          <v-list three-line style="overflow-y: scroll;">
+            <v-list-item-group>
+              <v-list-item
+                @click="selectedTreatment = treatment"
+                v-for="treatment in getTreatments"
+                :key="treatment.id"
+              >
+                <v-list-item-avatar>
+                  <v-icon class="warning white--text"> mdi-medical-bag </v-icon>
+                </v-list-item-avatar>
+                <v-list-item-content>
+                  <v-list-item-title>{{ treatment.name }}</v-list-item-title>
+                  <v-list-item-subtitle
+                    >{{
+                      treatment.created instanceof Date
+                        ? treatment.created.toISOString().slice(0, 10)
+                        : treatment.created
+                            .toDate()
+                            .toISOString()
+                            .slice(0, 10)
+                    }}<br />
+                    {{
+                      treatment.description.length > 0
+                        ? treatment.description
+                        : "Brak opisu"
+                    }}</v-list-item-subtitle
+                  >
+                </v-list-item-content>
+              </v-list-item>
+            </v-list-item-group>
+          </v-list>
+        </v-card>
+      </v-col>
+      <v-col cols="12" md="9">
+        <v-card
+          class="mt-5 mt-md-0 ml-md-5 overflow-y: scroll;"
+          rounded="lg"
+          height="100%"
+        >
+          <TreatmentPreview :treatment="selectedTreatment" />
+        </v-card>
+      </v-col>
+    </v-row>
 
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <CreateTreatment />
-      </v-card-actions>
-    </v-card>
+    <div v-else class="treatmentsPage">
+      <v-tabs v-model="tab" background-color="primary" color="white" grow>
+        <v-tab v-for="item in ['Lista', 'Zabieg']" :key="item">
+          {{ item }}
+        </v-tab>
+      </v-tabs>
+
+      <v-tabs-items v-model="tab">
+        <v-tab-item class="pa-4">
+          <v-autocomplete
+            no-data-text="Brak zabiegów w bazie danych"
+            @change="searchSelect"
+            offset-y
+            v-model="searchTreatmentId"
+            :items="getTreatments"
+            item-text="name"
+            item-value="id"
+            label="Zabieg"
+            prepend-icon="mdi-account-search-outline"
+          ></v-autocomplete>
+          <v-list three-line style="overflow-y: scroll;">
+            <v-list-item-group>
+              <v-list-item
+                @click="selectedTreatment = treatment"
+                v-for="treatment in getTreatments"
+                :key="treatment.id"
+              >
+                <v-list-item-avatar>
+                  <v-icon class="warning white--text"> mdi-medical-bag </v-icon>
+                </v-list-item-avatar>
+                <v-list-item-content>
+                  <v-list-item-title>{{ treatment.name }}</v-list-item-title>
+                  <v-list-item-subtitle
+                    >{{
+                      treatment.created instanceof Date
+                        ? treatment.created.toISOString().slice(0, 10)
+                        : treatment.created
+                            .toDate()
+                            .toISOString()
+                            .slice(0, 10)
+                    }}<br />
+                    {{
+                      treatment.description.length > 0
+                        ? treatment.description
+                        : "Brak opisu"
+                    }}</v-list-item-subtitle
+                  >
+                </v-list-item-content>
+              </v-list-item>
+            </v-list-item-group>
+          </v-list> </v-tab-item
+        ><v-tab-item>
+          <div style="max-width: 100%">
+            <TreatmentPreview :treatment="selectedTreatment" />
+          </div> </v-tab-item
+      ></v-tabs-items>
+    </div>
   </v-container>
 </template>
 
 <script>
-import Treatment from "@/components/Treatment";
-import CreateTreatment from "@/components/CreateTreatment";
-import { mapGetters } from "vuex";
+import { mapGetters, mapActions } from "vuex";
+import TreatmentPreview from "@/components/TreatmentPreview";
 export default {
   components: {
-    Treatment,
-    CreateTreatment,
+    TreatmentPreview,
+  },
+  data: () => ({
+    tab: 0,
+    first: false,
+    selectedTreatment: null,
+    searchTreatmentId: null,
+  }),
+  methods: {
+    ...mapActions([]),
+    searchSelect() {
+      if (this.searchTreatmentId !== undefined) {
+        this.selectedTreatment = this.getTreatments.find((v) => {
+          return v.id === this.searchTreatmentId;
+        });
+      }
+    },
   },
   computed: {
     ...mapGetters(["getTreatments"]),
   },
+  mounted() {
+    if (this.getTreatments.length > 0) {
+      this.selectedTreatment = this.getTreatments[0];
+      this.searchTreatmentId = this.getTreatments[0].id;
+    }
+  },
+  watch: {
+    selectedTreatment(val) {
+      if (!this.first) this.first = true;
+      else {
+        this.searchTreatmentId = val.id;
+        this.tab = 1;
+      }
+    },
+  },
 };
 </script>
+
+<style scoped>
+.treatmentsPage {
+  height: 100%;
+  background: #fff;
+}
+</style>

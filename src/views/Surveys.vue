@@ -1,62 +1,156 @@
 <template>
-  <v-container fluid>
-    <v-card
-      class="mx-auto mt-16"
-      max-width="1100"
-      elevation="24"
-      rounded="xl"
-    >
-      <v-card-title class="grey--text text--darken-2"
-        >Ankiety do wysłania
-        <v-spacer></v-spacer>
-        <v-autocomplete
-          no-data-text="Brak ankiet"
-          label="Szukaj"
-          append-outer-icon="mdi-magnify"
-          class="mr-3"
-          :items="getSurveys"
-          item-text="name"
-          item-value="id"
-          clearable
-        ></v-autocomplete
-      ></v-card-title>
-      <v-card-text style="min-height: 300px">
-        <v-list three-line>
-          <v-list-item-group>
-            <Survey
-              :sendable="true"
-              :survey="survey"
-              v-for="survey in getSurveys"
-              :key="survey.id"
-            />
-          </v-list-item-group>
-        </v-list>
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <CreateSurvey />
-      </v-card-actions>
-    </v-card>
+  <v-container fluid :class="$vuetify.breakpoint.mobile ? 'pa-0' : ''">
+    <v-row no-gutters v-if="!$vuetify.breakpoint.mobile" style="height: 100%">
+      <v-col cols="12" md="3">
+        <v-card class="px-4 pt-2" rounded="lg" height="100%">
+          <v-autocomplete
+            no-data-text="Brak ankiet w bazie danych"
+            @change="searchSelect"
+            offset-y
+            v-model="searchSurveyId"
+            :items="getSurveys"
+            item-text="name"
+            item-value="id"
+            label="Ankieta"
+            prepend-icon="mdi-account-search-outline"
+          ></v-autocomplete>
+          <v-list three-line style="overflow-y: scroll;">
+            <v-list-item-group>
+              <v-list-item
+                @click="selectedSurvey = survey"
+                v-for="survey in getSurveys"
+                :key="survey.id"
+              >
+                <v-list-item-avatar>
+                  <v-icon class="white--text primary">
+                    mdi-clipboard-outline
+                  </v-icon>
+                </v-list-item-avatar>
+                <v-list-item-content>
+                  <v-list-item-title>{{ survey.name }}</v-list-item-title>
+                  <v-list-item-subtitle
+                    >{{ survey.date }}<br />
+                    {{
+                      survey.description.length > 0
+                        ? survey.description
+                        : "Brak opisu"
+                    }}</v-list-item-subtitle
+                  >
+                </v-list-item-content>
+              </v-list-item>
+            </v-list-item-group>
+          </v-list>
+        </v-card>
+      </v-col>
+      <v-col cols="12" md="9">
+        <v-card class="mt-5 mt-md-0 ml-md-5" rounded="lg" height="100%">
+          <SurveyPreview :survey="selectedSurvey" />
+        </v-card>
+      </v-col>
+    </v-row>
+
+    <div v-else class="surveysPage">
+      <v-tabs v-model="tab" background-color="primary" color="white" grow>
+        <v-tab v-for="item in ['Lista', 'Ankieta']" :key="item">
+          {{ item }}
+        </v-tab>
+      </v-tabs>
+
+      <v-tabs-items v-model="tab">
+        <v-tab-item class="pa-4">
+          <v-autocomplete
+            no-data-text="Brak ankiet w bazie danych"
+            @change="searchSelect"
+            offset-y
+            v-model="searchSurveyId"
+            :items="getSurveys"
+            item-text="name"
+            item-value="id"
+            label="Ankieta"
+            prepend-icon="mdi-account-search-outline"
+          ></v-autocomplete>
+          <v-list three-line style="overflow-y: scroll;">
+            <v-list-item-group>
+              <v-list-item
+                @click="selectedSurvey = survey"
+                v-for="survey in getSurveys"
+                :key="survey.id"
+              >
+                <v-list-item-avatar>
+                  <v-icon class="white--text primary">
+                    mdi-clipboard-outline
+                  </v-icon>
+                </v-list-item-avatar>
+                <v-list-item-content>
+                  <v-list-item-title>{{ survey.name }}</v-list-item-title>
+                  <v-list-item-subtitle
+                    >{{ survey.date }}<br />
+                    {{
+                      survey.description.length > 0
+                        ? survey.description
+                        : "Brak opisu"
+                    }}</v-list-item-subtitle
+                  >
+                </v-list-item-content>
+              </v-list-item>
+            </v-list-item-group>
+          </v-list> </v-tab-item
+        ><v-tab-item>
+          <div style="max-width: 100%">
+            <SurveyPreview :survey="selectedSurvey" />
+          </div> </v-tab-item
+      ></v-tabs-items>
+    </div>
   </v-container>
 </template>
 
 <script>
-import { mapActions, mapGetters } from "vuex";
-import Survey from "@/components/Survey";
-import CreateSurvey from "@/components/CreateSurvey";
+import { mapGetters, mapActions } from "vuex";
+import SurveyPreview from "@/components/SurveyPreview";
 export default {
+  components: {
+    SurveyPreview,
+  },
+  data: () => ({
+    tab: 0,
+    first: false,
+    selectedSurvey: null,
+    searchSurveyId: null,
+  }),
   methods: {
-    ...mapActions(["fetchSurveys"]),
+    ...mapActions([]),
+    searchSelect() {
+      if (this.searchSurveyId !== undefined) {
+        this.selectedSurvey = this.getSurveys.find((v) => {
+          return v.id === this.searchSurveyId;
+        });
+      }
+    },
   },
   computed: {
     ...mapGetters(["getSurveys"]),
   },
-  components: {
-    Survey,
-    CreateSurvey,
-  },
   mounted() {
-    this.fetchSurveys();
+    if (this.getSurveys.length > 0) {
+      this.selectedSurvey = this.getSurveys[0];
+      this.searchSurveyId = this.getSurveys[0].id;
+    }
+  },
+  watch: {
+    selectedSurvey(val) {
+      if (!this.first) this.first = true;
+      else {
+        this.searchSurveyId = val.id;
+        this.tab = 1;
+      }
+    },
   },
 };
 </script>
+
+<style scoped>
+.surveysPage {
+  height: 100%;
+  background: #fff;
+}
+</style>

@@ -1,7 +1,7 @@
 <template>
   <v-app>
-    <Navbar />
     <v-main class="appstyle">
+      <Navbar />
       <v-alert
         transition="slide-y-transition"
         dense
@@ -11,7 +11,7 @@
       >
         {{ getMainAlert.text }}
       </v-alert>
-      <router-view></router-view>
+      <router-view style="height: 100%;"></router-view>
     </v-main>
   </v-app>
 </template>
@@ -37,7 +37,8 @@ export default {
 </script>
 
 <style>
-  .appstyle {
-    background: #1976d2;
-  }
+.appstyle {
+  background: #1976d2;
+  height: 100%;
+}
 </style>

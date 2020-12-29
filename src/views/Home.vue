@@ -27,7 +27,7 @@
 
 <script>
 import Survey from "@/components/Survey";
-import { mapActions, mapGetters } from 'vuex';
+import { mapGetters } from 'vuex';
 export default {
   components: {
     Survey,
@@ -36,12 +36,6 @@ export default {
 
   }),
   computed: mapGetters(['getCompletedPatientSurveys', 'getIncompletedPatientSurveys']),
-  methods: {
-    ...mapActions(['fetchPatientSurveys']),
-  },
-  mounted() {
-    this.fetchPatientSurveys()
-  }
 };
 </script>
 
