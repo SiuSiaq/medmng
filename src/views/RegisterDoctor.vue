@@ -133,10 +133,30 @@
             :items="institutes"
             item-text="name"
             item-value="ref"
-            :rules="[(v) => !!v || 'Hasło jest wymagane']"
+            :rules="[(v) => !!v || 'Instytut jest wymagany']"
             required
           >
           </v-autocomplete>
+          <v-autocomplete
+            no-data-text="Brak instytutów w bazie danych"
+            outlined
+            v-model="wardRef"
+            label="Oddział"
+            :items="selectedInstitute.wards"
+            item-text="name"
+            item-value="ref"
+            :rules="[(v) => !!v || 'Brak oddziałów w bazie']"
+            required
+          >
+          </v-autocomplete>
+          <v-text-field
+            outlined
+            v-model="instituteCode"
+            :counter="8"
+            :rules="instituteCodeRules"
+            label="Kod instytutu"
+            required
+          ></v-text-field>
           <div class="d-flex mt-2 mb-1">
             <v-btn text @click="el = 2"> Wróć </v-btn>
             <v-spacer></v-spacer>
@@ -166,6 +186,7 @@ export default {
     valid: true,
     personalValid: true,
     addressValid: true,
+    wardRef: null,
     address: {
       country: "Poland",
       city: "",
@@ -173,6 +194,11 @@ export default {
       local_number: null,
       zip_code: "",
     },
+    instituteCode: "",
+    instituteCodeRules: [
+      (v) => !!v || "Kod instytucji jest wymagany",
+      (v) => (v && v.length == 8) || "Kod instytucji musi składać się z 8 znaków",
+    ],
     email: "",
     emailRules: [
       (v) => !!v || "E-mail jest wymagany",
@@ -221,11 +247,13 @@ export default {
         "Nazwa miejscowości musi być krótsza niż 100 znaków",
     ],
     institutes: [],
-    selectedInstitute: null,
+    selectedInstitute: {
+      wards: [],
+    },
     instituteSelect: null,
   }),
   methods: {
-    ...mapActions(["register", "fetchInstitutesList"]),
+    ...mapActions(["registerDoctor", "fetchInstitutesList"]),
     stepFirstClick() {
       if (!this.$refs.registerForm.validate()) return;
       this.el = 2;
@@ -249,8 +277,10 @@ export default {
         local_number: this.local_number,
         instituteRef: this.selectedInstitute.ref,
         instituteName: this.selectedInstitute.name,
+        instituteCode: this.instituteCode,
+        wardRef: this.wardRef,
       };
-      await this.register(data);
+      await this.registerDoctor(data);
       this.loader = false;
       console.log("Registerd!");
     },

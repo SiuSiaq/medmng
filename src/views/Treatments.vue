@@ -1,6 +1,7 @@
 <template>
   <v-container fluid :class="$vuetify.breakpoint.mobile ? 'pa-0' : ''">
     <v-row no-gutters v-if="!$vuetify.breakpoint.mobile" style="height: 100%">
+      <CreateTreatment/>
       <v-col cols="12" md="3">
         <v-card class="px-4 pt-2" rounded="lg" height="100%">
           <v-autocomplete
@@ -22,7 +23,7 @@
                 :key="treatment.id"
               >
                 <v-list-item-avatar>
-                  <v-icon class="warning white--text"> mdi-medical-bag </v-icon>
+                  <v-icon class="primary white--text"> mdi-medical-bag </v-icon>
                 </v-list-item-avatar>
                 <v-list-item-content>
                   <v-list-item-title>{{ treatment.name }}</v-list-item-title>
@@ -49,7 +50,7 @@
       </v-col>
       <v-col cols="12" md="9">
         <v-card
-          class="mt-5 mt-md-0 ml-md-5 overflow-y: scroll;"
+          class="mt-5 mt-md-0 ml-md-5"
           rounded="lg"
           height="100%"
         >
@@ -59,6 +60,7 @@
     </v-row>
 
     <div v-else class="treatmentsPage">
+      <CreateTreatment/>
       <v-tabs v-model="tab" background-color="primary" color="white" grow>
         <v-tab v-for="item in ['Lista', 'Zabieg']" :key="item">
           {{ item }}
@@ -86,7 +88,7 @@
                 :key="treatment.id"
               >
                 <v-list-item-avatar>
-                  <v-icon class="warning white--text"> mdi-medical-bag </v-icon>
+                  <v-icon class="primary white--text"> mdi-medical-bag </v-icon>
                 </v-list-item-avatar>
                 <v-list-item-content>
                   <v-list-item-title>{{ treatment.name }}</v-list-item-title>
@@ -121,9 +123,11 @@
 <script>
 import { mapGetters, mapActions } from "vuex";
 import TreatmentPreview from "@/components/TreatmentPreview";
+import CreateTreatment from "@/components/CreateTreatment";
 export default {
   components: {
     TreatmentPreview,
+    CreateTreatment,
   },
   data: () => ({
     tab: 0,

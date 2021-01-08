@@ -1,4 +1,3 @@
-import { db } from '@/main'
 const state = {
     treatments: [],
 }
@@ -8,8 +7,8 @@ const getters = {
 }
 
 const actions = {
-    async fetchTreatments({ commit }) {
-        db.collection('treatments')
+    async fetchTreatments({ commit, rootState }) {
+        rootState.login.userData.wardRef.collection('treatments')
             .onSnapshot(snapshot => {
                 snapshot.docChanges().forEach(change => {
                     if (change.type === 'added') {
@@ -30,9 +29,9 @@ const actions = {
     async createTreatment({ rootState, dispatch }, treatment) {
         try {
             treatment.authorName = rootState.login.userData.fullname
-            treatment.authorRef = db.collection('patients').doc(rootState.login.userData.uid)
+            treatment.authorRef = rootState.login.userData.instituteRef.collection('patients').doc(rootState.login.userData.uid)
             treatment.created = new Date()
-            await db.collection('treatments').add(treatment)
+            await rootState.login.userData.wardRef.collection('treatments').add(treatment)
             dispatch('throwSurveyAlert', {
                 text: 'Zabieg został utworzony',
                 success: true,
@@ -45,6 +44,30 @@ const actions = {
             })
         }
     },
+    async downloadTreatmentData({ dispatch, rootState }, id) {
+        try {
+            let data = []
+            const res = await rootState.login.userData.wardRef.collection('treatments').doc(id).collection('surveysData').get()
+            res.forEach(doc => {
+                let obj;
+                doc.data().data.forEach(field => {
+                    obj = Object.assign({}, obj, field);
+                });
+                data.push(obj);
+            })
+            dispatch('throwMainAlert', {
+                text: 'Pomyślnie przygotowano dane do pobrania',
+                success: true,
+            })
+            return data
+        } catch (error) {
+            console.error(error);
+            dispatch('throwMainAlert', {
+                text: 'Nie udało się przygotować danych do pobrania',
+                success: false,
+            })
+        }
+    }
 }
 
 const mutations = {

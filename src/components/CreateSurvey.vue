@@ -7,9 +7,9 @@
     transition="dialog-bottom-transition"
   >
     <template v-slot:activator="{ on, attrs }">
-      <v-btn v-bind="attrs" v-on="on" class="mr-2 mb-2" color="primary"
-        >Stwórz ankietę</v-btn
-      >
+      <v-btn fixed bottom right fab color="primary" v-bind="attrs" v-on="on">
+        <v-icon large>mdi-plus-circle</v-icon>
+      </v-btn>
     </template>
     <v-card>
       <v-toolbar dark color="primary">

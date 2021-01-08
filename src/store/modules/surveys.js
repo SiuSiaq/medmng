@@ -1,4 +1,4 @@
-import { db } from "@/main"
+import { db, increment } from "@/main"
 const state = {
     surveys: [],
     patientSurveys: [],
@@ -12,9 +12,9 @@ const getters = {
 }
 
 const actions = {
-    async fetchSurveys({ commit }) {
+    async fetchSurveys({ commit, rootState }) {
         try {
-            db.collection('surveys')
+            rootState.login.userData.wardRef.collection('surveys')
                 .onSnapshot(snapshot => {
                     snapshot.docChanges().forEach(change => {
                         if (change.type === 'added') {
@@ -44,7 +44,7 @@ const actions = {
                 console.log('No user')
                 return
             }
-            db.collection('patients').doc(rootState.login.user.uid).collection('surveys')
+            rootState.login.userData.instituteRef.collection('patients').doc(rootState.login.user.uid).collection('surveys')
                 .onSnapshot(snapshot => {
                     snapshot.docChanges().forEach(change => {
                         if (change.type === 'added') {
@@ -71,26 +71,43 @@ const actions = {
     async submitSurvey({ rootState, dispatch }, survey) {
         try {
             survey.completed = true
-            const batch = db.batch();
+            survey.submitted = new Date()
+            const batch = db.batch()
 
-            const patientSurveyRef = db.collection('patients').doc(rootState.login.user.uid).collection('surveys').doc(survey.id);
-            const surveyRef = db.collection('surveys').doc(survey.surveyId).collection('completedSurveys').doc();
-
-
-            batch.update(patientSurveyRef, {
-                completed: true,
-                fields: survey.fields,
-            })
+            const patientSurveyRef = rootState.login.userData.instituteRef.collection('patients').doc(rootState.login.user.uid).collection('surveys').doc(survey.id);
+            const surveyRef = survey.surveyRef;
 
             let data = {}
             survey.fields.forEach(v => {
                 data[v.columnName] = v.data
             })
 
-            batch.set(surveyRef, {
-                data,
-                submited: new Date(),
+
+            batch.update(patientSurveyRef, {
+                completed: true,
+                fields: survey.fields,
+                submitted: new Date(),
             })
+
+            if(survey.appointmentSurveyRef) {
+                batch.update(survey.appointmentSurveyRef, {
+                    completed: true,
+                    fields: survey.fields,
+                    submitted: new Date(),
+                    data,
+                })
+            }
+
+            batch.set(surveyRef.collection('submittedSurveys').doc(), {
+                data,
+                submitted: new Date(),
+            })
+
+            if(survey.appointmentRef) {
+                batch.update(survey.appointmentRef, {
+                    surveyCount: increment,
+                })
+            }
 
             await batch.commit();
 
@@ -109,9 +126,9 @@ const actions = {
     async createSurvey({ rootState, dispatch }, survey) {
         try {
             survey.date = new Date().toISOString().slice(0, 10)
-            survey.author = db.collection('patients').doc(rootState.login.user.uid)
+            survey.author = rootState.login.userData.instituteRef.collection('patients').doc(rootState.login.user.uid)
             survey.completed = false
-            const res = await db.collection('surveys').add(survey)
+            const res = await rootState.login.userData.wardRef.collection('surveys').add(survey)
             survey.id = res.id
             dispatch('throwSurveyAlert', {
                 text: 'Ankieta utworzona',
@@ -125,11 +142,12 @@ const actions = {
             })
         }
     },
-    async sendSurvey({ dispatch }, payload) {
+    async sendSurvey({ dispatch, rootState }, payload) {
         try {
-            await db.collection('patients').doc(payload.id).collection('surveys').add({
+            await rootState.login.userData.instituteRef.collection('patients').doc(payload.id).collection('surveys').add({
                 ...payload.survey,
-                surveyId: payload.survey.id,
+                surveyRef: rootState.login.userData.wardRef.collection('surveys').doc(payload.survey.id),
+                sent: new Date(),
             })
             dispatch('throwSurveyAlert', {
                 text: 'Ankieta pomyślnie wysłana do pacjent',
@@ -143,9 +161,9 @@ const actions = {
             })
         }
     },
-    async downloadSurvey({ dispatch }, id) {
+    async downloadSurvey({ dispatch, rootState }, id) {
         let data = []
-        const res = await db.collection('surveys').doc(id).collection('completedSurveys').get()
+        const res = await rootState.login.userData.wardRef.collection('surveys').doc(id).collection('submittedSurveys').get()
         res.forEach(doc => {
             data.push(
                 doc.data().data
@@ -166,7 +184,7 @@ const mutations = {
     surveyAdded: (state, data) => state.surveys.unshift(data),
     surveyRemoved: (state, id) => state.surveys = state.surveys.filter(v => v.id !== id),
     surveyModified: (state, data) => state.surveys.map((obj) => obj.id === data.id ? data : obj),
-    patientSurveySubmited: (state, data) => state.patientSurveys.map((obj) => obj.id === data.id ? data : obj),
+    patientSurveysubmitted: (state, data) => state.patientSurveys.map((obj) => obj.id === data.id ? data : obj),
 }
 
 export default {

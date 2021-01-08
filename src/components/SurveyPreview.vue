@@ -109,7 +109,7 @@ export default {
         a = document.createElement("a");
       a.download = "test.json";
       a.href = window.URL.createObjectURL(blob);
-      a.dataset.downloadurl = ["text/json", a.download, a.href].join(":");
+      a.dataset.downloadurl = [`${this.survey.name}/json`, a.download, a.href].join(":");
       this.downloadLoader = false;
       e.initEvent(
         "click",

@@ -21,8 +21,12 @@ const actions = {
             if (user) {
                 commit('setIsLoggedIn', true);
                 commit('setUser', user.user);
-                sleep(4000);
-                await db.collection('patients').doc(user.user.uid).update({
+
+                const batch = db.batch()
+
+                batch.set(userCredentials.instituteRef.collection('patients').doc(user.user.uid), {
+                    pesel: userCredentials.pesel,
+                    email: userCredentials.email,
                     fullname: `${userCredentials.name} ${userCredentials.surname}`,
                     name: userCredentials.name,
                     surname: userCredentials.surname,
@@ -32,8 +36,87 @@ const actions = {
                     birthday: decoded.date,
                     sex: decoded.sex,
                     registered: new Date(),
-                });
-                let tmp = await db.collection('patients').doc(user.user.uid).get();
+                    instituteRef: userCredentials.instituteRef,
+                    instituteName: userCredentials.instituteName,
+                })
+
+                batch.set(db.collection('users').doc(user.user.uid), {
+                    email: userCredentials.email,
+                    fullname: `${userCredentials.name} ${userCredentials.surname}`,
+                    name: userCredentials.name,
+                    surname: userCredentials.surname,
+                    phone: userCredentials.phone,
+                    address: userCredentials.address,
+                    local_number: userCredentials.local_number === undefined ? null : userCredentials.local_number,
+                    birthday: decoded.date,
+                    sex: decoded.sex,
+                    registered: new Date(),
+                    instituteRef: userCredentials.instituteRef,
+                    instituteName: userCredentials.instituteName,
+                })
+
+                await batch.commit();
+
+                let tmp = await db.collection('users').doc(user.user.uid).get();
+                let userData = tmp.data();
+                userData.uid = tmp.id;
+                commit('setUserData', userData);
+                return true;
+            }
+        } catch (error) {
+            console.log(error.code);
+            return false;
+        }
+        return true;
+    },
+    async registerDoctor({ commit }, userCredentials) {
+        try {
+            let decoded = peselDecode(userCredentials.pesel);
+            let user = await auth.createUserWithEmailAndPassword(userCredentials.email, userCredentials.password);
+            console.log(`Register: ${user.user.uid}`);
+            if (user) {
+                commit('setIsLoggedIn', true);
+                commit('setUser', user.user);
+
+                const batch = db.batch()
+
+                batch.set(userCredentials.instituteRef.collection('doctors').doc(user.user.uid), {
+                    pesel: userCredentials.pesel,
+                    email: userCredentials.email,
+                    fullname: `${userCredentials.name} ${userCredentials.surname}`,
+                    name: userCredentials.name,
+                    surname: userCredentials.surname,
+                    phone: userCredentials.phone,
+                    address: userCredentials.address,
+                    local_number: userCredentials.local_number === undefined ? null : userCredentials.local_number,
+                    birthday: decoded.date,
+                    sex: decoded.sex,
+                    registered: new Date(),
+                    instituteRef: userCredentials.instituteRef,
+                    instituteName: userCredentials.instituteName,
+                    wardRef: userCredentials.wardRef,
+                })
+
+                batch.set(db.collection('users').doc(user.user.uid), {
+                    email: userCredentials.email,
+                    fullname: `${userCredentials.name} ${userCredentials.surname}`,
+                    name: userCredentials.name,
+                    surname: userCredentials.surname,
+                    phone: userCredentials.phone,
+                    address: userCredentials.address,
+                    local_number: userCredentials.local_number === undefined ? null : userCredentials.local_number,
+                    birthday: decoded.date,
+                    sex: decoded.sex,
+                    registered: new Date(),
+                    instituteRef: userCredentials.instituteRef,
+                    instituteName: userCredentials.instituteName,
+                    wardRef: userCredentials.wardRef,
+                    doctor: true,
+                })
+
+                await batch.commit();
+
+                let tmp = await db.collection('users').doc(user.user.uid).get();
                 let userData = tmp.data();
                 userData.uid = tmp.id;
                 commit('setUserData', userData);
@@ -51,7 +134,7 @@ const actions = {
             if (user) {
                 commit('setIsLoggedIn', true);
                 commit('setUser', user.user);
-                let tmp = await db.collection('patients').doc(user.user.uid).get();
+                let tmp = await db.collection('users').doc(user.user.uid).get();
                 let userData = tmp.data();
                 userData.uid = tmp.id;
                 commit('setUserData', userData);
@@ -70,13 +153,29 @@ const actions = {
         console.log("logged out");
         return;
     },
+    async fetchInstitutesList({dispatch}) {
+        try {
+            const res = await db.collection('utilities').doc('institutesList').get();
+            let institutes = [];
+            res.data().list.forEach(element => {
+                institutes.push(element)
+            });
+            return institutes;
+        } catch (error) {
+            console.error(error)
+            dispatch('throwSurveyAlert', {
+                text: 'Nie udało się pobrać listy instytucji',
+                success: false,
+            })
+        }
+    },
     authStateChanged({ commit, dispatch }) {
         auth.onAuthStateChanged(async (user) => {
             if (user) {
                 // User is signed in.
                 commit('setIsLoggedIn', true);
                 commit('setUser', user);
-                let tmp = await db.collection('patients').doc(user.uid).get();
+                let tmp = await db.collection('users').doc(user.uid).get();
                 let userData = {
                     ...tmp.data(),
                     uid: tmp.id,
@@ -85,6 +184,7 @@ const actions = {
                 if (userData.doctor) {
                     dispatch('fetchTreatments');
                     dispatch('fetchPatients');
+                    dispatch('fetchDoctors');
                     dispatch('fetchSurveys');
                     dispatch('fetchPatientSurveys');
                     dispatch('fetchAppointments');
@@ -161,11 +261,3 @@ function peselDecode(pesel) {
     }
     return { sex: sex, date: urodzony };
 }
-
-function sleep(milliseconds) {
-    const date = Date.now();
-    let currentDate = null;
-    do {
-        currentDate = Date.now();
-    } while (currentDate - date < milliseconds);
-} 

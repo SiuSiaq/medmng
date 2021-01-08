@@ -1,5 +1,6 @@
 <template>
   <v-container fluid :class="$vuetify.breakpoint.mobile ? 'pa-0' : ''">
+    <CreateAppointment/>
     <v-row no-gutters v-if="!$vuetify.breakpoint.mobile" style="height: 100%">
       <v-col cols="12" md="3">
         <v-card class="px-4 pt-2" rounded="lg" height="100%">
@@ -22,7 +23,7 @@
                 :key="appointment.id"
               >
                 <v-list-item-avatar>
-                  <v-icon class="warning white--text">
+                  <v-icon class="primary white--text">
                     mdi-hospital-box-outline
                   </v-icon>
                 </v-list-item-avatar>
@@ -82,7 +83,7 @@
                 :key="appointment.id"
               >
                 <v-list-item-avatar>
-                  <v-icon class="warning white--text">
+                  <v-icon class="primary white--text">
                     mdi-hospital-box-outline
                   </v-icon>
                 </v-list-item-avatar>
@@ -113,9 +114,11 @@
 <script>
 import { mapGetters, mapActions } from "vuex";
 import AppointmentPreview from "@/components/AppointmentPreview";
+import CreateAppointment from "@/components/CreateAppointment";
 export default {
   components: {
     AppointmentPreview,
+    CreateAppointment,
   },
   data: () => ({
     tab: 0,

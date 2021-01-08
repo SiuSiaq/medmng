@@ -7,8 +7,8 @@
     transition="dialog-bottom-transition"
   >
     <template v-slot:activator="{ on, attrs }">
-      <v-btn v-bind="attrs" v-on="on" color="primary" class="mr-2 mb-2">
-        Stwórz zabieg
+      <v-btn fixed bottom right fab color="primary" v-bind="attrs" v-on="on">
+        <v-icon large>mdi-plus-circle</v-icon>
       </v-btn>
     </template>
     <v-card>
@@ -31,99 +31,168 @@
 
       <v-form class="mt-5 px-3" ref="form" v-model="valid">
         <v-row class="mt-md-6 mt-4">
-          <v-col cols="12" md="6">
-            <div class="mb-4 text-md-h4 text-h5 grey--text text--darken-2">
-              Informacje
-            </div>
-            <div class="ml-3">
-              <v-text-field
-                outlined
-                class="mb-2 mt-5 mt-md-9"
-                v-model="treatment.name"
-                :counter="100"
-                :rules="nameRules"
-                label="Nazwa zabiegu"
-                required
-              ></v-text-field>
-              <v-textarea
-                class="mt-md-5"
-                outlined
-                rows="1"
-                v-model="treatment.description"
-                auto-grow
-                clearable
-                label="Opis zabiegu"
-                required
-              >
-              </v-textarea>
+          <v-col cols="12">
+            <div class="mx-auto">
+              <div class="mb-4 text-md-h4 text-h5 grey--text text--darken-2">
+                Informacje
+              </div>
+              <v-row>
+                <v-col cols="12" md="6">
+                  <v-text-field
+                    outlined
+                    v-model="treatment.name"
+                    :counter="100"
+                    :rules="nameRules"
+                    label="Nazwa zabiegu"
+                    required
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" md="6">
+                  <v-textarea
+                    outlined
+                    rows="1"
+                    v-model="treatment.description"
+                    auto-grow
+                    clearable
+                    label="Opis zabiegu"
+                    required
+                  >
+                  </v-textarea>
+                </v-col>
+              </v-row>
             </div>
           </v-col>
           <v-col cols="12" md="6">
             <div class="mb-4 text-md-h4 text-h5 grey--text text--darken-2">
               Dla pacjenta
             </div>
-            <div class="ml-3">
-              <div class="caption">Przed zabiegiem</div>
+            <div class="ml-3" v-for="(item, i) in patientSurveys" :key="i">
               <v-autocomplete
-                v-model="patientBefore"
+                label="Ankieta"
+                v-model="item.id"
                 :items="getSurveys"
                 outlined
                 item-text="name"
                 item-value="id"
-                multiple
-                small-chips
                 clearable
               >
               </v-autocomplete>
-              <div class="caption">Po zabiegu</div>
-              <v-autocomplete
-                v-model="patientAfter"
-                :items="getSurveys"
-                outlined
-                item-text="name"
-                item-value="id"
-                multiple
-                small-chips
-                clearable
-              >
-              </v-autocomplete>
+              <div class="d-flex">
+                <v-select
+                  class="mr-4"
+                  style="max-width: 200px;"
+                  label="Przed/Po"
+                  flat
+                  :items="['Przed', 'Po', 'Natychmiast', 'W dniu wykonania']"
+                  v-model="item.timeType"
+                ></v-select>
+                <v-text-field
+                  style="max-width: 200px;"
+                  label="Liczba dni"
+                  :disabled="
+                    item.timeType === 'Natychmiast' ||
+                      item.timeType === 'W dniu wykonania'
+                  "
+                  :rules="[(v) => !!v || `Czas wysłania jest wymagany`]"
+                  v-model="item.days"
+                  :required="
+                    item.timeType === 'Natychmiast' ||
+                      item.timeType === 'W dniu wykonania'
+                  "
+                >
+                </v-text-field>
+                <v-spacer></v-spacer>
+                <v-btn
+                  text
+                  color="error"
+                  class="mr-5"
+                  @click="patientSurveys.splice(i, 1)"
+                  >Usuń</v-btn
+                >
+              </div>
             </div>
+            <v-btn
+              color="primary"
+              class="ml-3"
+              @click="
+                patientSurveys.push({
+                  itemType: 'Przed',
+                  days: 0,
+                  id: null,
+                })
+              "
+              >Dodaj ankietę</v-btn
+            >
           </v-col>
           <v-col cols="12" md="6">
             <div class="mb-4 text-md-h4 text-h5 grey--text text--darken-2">
               Dla lekarza
             </div>
-            <div class="ml-3">
-              <div class="caption">Przed zabiegiem</div>
+            <div class="ml-3" v-for="(item, i) in doctorSurveys" :key="i">
               <v-autocomplete
-                v-model="doctorBefore"
+                no-data-text="Brak ankiet"
+                label="Ankieta"
+                v-model="item.id"
                 :items="getSurveys"
                 outlined
                 item-text="name"
                 item-value="id"
-                multiple
-                small-chips
                 clearable
               >
               </v-autocomplete>
-              <div class="caption">Po zabiegu</div>
-              <v-autocomplete
-                v-model="doctorAfter"
-                :items="getSurveys"
-                outlined
-                item-text="name"
-                item-value="id"
-                multiple
-                small-chips
-                clearable
-              >
-              </v-autocomplete>
+              <div class="d-flex">
+                <v-select
+                  class="mr-4"
+                  style="max-width: 200px;"
+                  label="Przed/Po"
+                  flat
+                  :items="['Przed', 'Po', 'Natychmiast', 'W dniu wykonania']"
+                  v-model="item.timeType"
+                  :rules="[(v) => !!v || `Ankieta jest wymagana`]"
+                  required
+                ></v-select>
+                <v-text-field
+                  style="max-width: 200px;"
+                  label="Liczba dni"
+                  :disabled="
+                    item.timeType === 'Natychmiast' ||
+                      item.timeType === 'W dniu wykonania'
+                  "
+                  :rules="[(v) => !!v || `Czas wysłania jest wymagany`]"
+                  v-model="item.days"
+                  :required="
+                    item.timeType === 'Natychmiast' ||
+                      item.timeType === 'W dniu wykonania'
+                  "
+                >
+                </v-text-field>
+                <v-spacer></v-spacer>
+                <v-btn
+                  text
+                  color="error"
+                  class="mr-5"
+                  @click="doctorSurveys.splice(i, 1)"
+                  >Usuń</v-btn
+                >
+              </div>
             </div>
+            <v-btn
+              color="primary"
+              class="ml-3"
+              @click="
+                doctorSurveys.push({
+                  itemType: 'Przed',
+                  days: 0,
+                  id: null,
+                })
+              "
+              >Dodaj ankietę</v-btn
+            >
           </v-col>
         </v-row>
         <div class="d-flex justify-end">
           <v-btn
-            class="mb-5"
+            class="mb-5 mt-6"
             :loading="loader"
             :disabled="!valid"
             color="primary"
@@ -140,7 +209,7 @@
 import { mapActions, mapGetters } from "vuex";
 export default {
   computed: {
-    ...mapGetters(["getSurveyAlert", "getSurveys"]),
+    ...mapGetters(["getSurveyAlert", "getSurveys", "getUserData"]),
   },
   data: () => ({
     treatment: {
@@ -150,10 +219,8 @@ export default {
     },
     dialog: false,
     valid: true,
-    patientBefore: [],
-    patientAfter: [],
-    doctorBefore: [],
-    doctorAfter: [],
+    patientSurveys: [],
+    doctorSurveys: [],
     loader: false,
     nameRules: [
       (v) => !!v || "Nazwa ankiety jest wymagana",
@@ -165,36 +232,33 @@ export default {
   methods: {
     ...mapActions(["createTreatment"]),
     async createTreatmentClick() {
-      if(!this.$refs.form.validate()) return;
+      if (!this.$refs.form.validate()) return;
       this.loader = true;
-      if (this.patientBefore.length > 0) {
-        this.treatment.patientBefore = [];
-        this.patientBefore.forEach((v) => {
-          let el = this.getSurveys.find((e) => e.id === v);
-          this.treatment.patientBefore.push({ name: el.name, id: el.id });
+
+      this.treatment.patientSurveys = [];
+      if (this.patientSurveys.length > 0) {
+        this.patientSurveys.forEach((item) => {
+          let el = this.getSurveys.find((e) => e.id === item.id);
+          item.ref = this.getUserData.wardRef
+            .collection("surveys")
+            .doc(item.id);
+          delete item.id;
+          this.treatment.patientSurveys.push({ name: el.name, ...item });
         });
       }
-      if (this.patientAfter.length > 0) {
-        this.treatment.patientAfter = [];
-        this.patientAfter.forEach((v) => {
-          let el = this.getSurveys.find((e) => e.id === v);
-          this.treatment.patientAfter.push({ name: el.name, id: el.id });
+
+      this.treatment.doctorSurveys = [];
+      if (this.doctorSurveys.length > 0) {
+        this.doctorSurveys.forEach((item) => {
+          let el = this.getSurveys.find((e) => e.id === item.id);
+          item.ref = this.getUserData.wardRef
+            .collection("surveys")
+            .doc(item.id);
+          delete item.id;
+          this.treatment.doctorSurveys.push({ name: el.name, ...item });
         });
       }
-      if (this.doctorBefore.length > 0) {
-        this.treatment.doctorBefore = [];
-        this.doctorBefore.forEach((v) => {
-          let el = this.getSurveys.find((e) => e.id === v);
-          this.treatment.doctorBefore.push({ name: el.name, id: el.id });
-        });
-      }
-      if (this.doctorAfter.length > 0) {
-        this.treatment.doctorAfter = [];
-        this.doctorAfter.forEach((v) => {
-          let el = this.getSurveys.find((e) => e.id === v);
-          this.treatment.doctorAfter.push({ name: el.name, id: el.id });
-        });
-      }
+
       await this.createTreatment(this.treatment);
       this.loader = false;
       this.$refs.form.reset();

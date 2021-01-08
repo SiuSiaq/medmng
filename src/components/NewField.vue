@@ -70,7 +70,7 @@ export default {
     columnName: '',
     columnNameRules: [
       (v) =>
-        (v.length <= 250) || "Nazwa kolumny musi być krótsza niż 250 znaków",
+        (v && v.length <= 250) || "Nazwa kolumny musi być krótsza niż 250 znaków",
     ],
     description: "",
     type: 1,

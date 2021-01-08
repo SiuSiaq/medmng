@@ -7,8 +7,8 @@
     transition="dialog-bottom-transition"
   >
     <template v-slot:activator="{ on, attrs }">
-      <v-btn v-bind="attrs" v-on="on" color="primary" class="mr-2 mb-2">
-        Umów zabieg
+      <v-btn fixed bottom right fab color="primary" v-bind="attrs" v-on="on">
+        <v-icon large>mdi-plus-circle</v-icon>
       </v-btn>
     </template>
     <v-card>
@@ -37,6 +37,7 @@
       >
         <div class="caption">Pacjent</div>
         <v-autocomplete
+          no-data-text="Brak pacjentów"
           outlined
           :rules="[(v) => !!v || `Pacjent jest wymagany`]"
           :items="getPatients"
@@ -45,8 +46,20 @@
           item-value="id"
         >
         </v-autocomplete>
+        <div class="caption">Doktor</div>
+        <v-autocomplete
+          no-data-text="Brak doktorów"
+          outlined
+          :rules="[(v) => !!v || `Doktor jest wymagany`]"
+          :items="getDoctors"
+          v-model="doctor"
+          item-text="fullname"
+          item-value="id"
+        >
+        </v-autocomplete>
         <div class="caption">Zabieg</div>
         <v-autocomplete
+          no-data-text="Brak zabiegów"
           outlined
           :rules="[(v) => !!v || `Zabieg jest wymagany`]"
           :items="getTreatments"
@@ -59,8 +72,7 @@
         <v-menu
           ref="menu"
           v-model="menu"
-          :close-on-content-click="false"
-          :return-value.sync="appointment.date"
+          :close-on-content-click="true"
           transition="scale-transition"
           offset-y
           min-width="290px"
@@ -68,23 +80,22 @@
           <template v-slot:activator="{ on, attrs }">
             <v-text-field
               outlined
-              v-model="appointment.date"
+              v-model="computedDateFormatted"
               append-icon="mdi-calendar"
               readonly
               v-bind="attrs"
               v-on="on"
+              :rules="[(v) => !!v || 'Data zabiegu jest wymagana']"
             ></v-text-field>
           </template>
-          <v-date-picker v-model="appointment.date" no-title scrollable>
+          <v-date-picker
+            v-model="dateDisplay"
+            no-title
+            scrollable
+            @input="menu = false"
+          >
             <v-spacer></v-spacer>
             <v-btn text color="primary" @click="menu = false"> anuluj </v-btn>
-            <v-btn
-              text
-              color="primary"
-              @click="$refs.menu.save(appointment.date)"
-            >
-              OK
-            </v-btn>
           </v-date-picker>
         </v-menu>
         <div class="d-flex">
@@ -102,13 +113,15 @@
 import { mapActions, mapGetters } from "vuex";
 export default {
   data: () => ({
+    dateDisplay: new Date().toISOString().slice(0, 10),
     loader: false,
     dialog: false,
     valid: true,
     patient: null,
+    doctor: null,
     treatment: null,
     appointment: {
-      date: new Date().toISOString().slice(0, 10),
+      date: new Date(),
     },
     menu: false,
   }),
@@ -118,11 +131,23 @@ export default {
       if (!this.patient || !this.treatment) return;
       this.loader = true;
       let patient = this.getPatients.find((v) => v.id === this.patient);
+      let doctor = this.getDoctors.find((v) => v.id === this.doctor);
       let treatment = this.getTreatments.find((v) => v.id === this.treatment);
       this.appointment.name = treatment.name;
       this.appointment.patient = patient.fullname;
       this.appointment.patientRef = patient.id;
+      this.appointment.doctorRef = doctor.id;
       this.appointment.treatmentRef = treatment.id;
+      this.appointment.surveys = [
+        ...treatment.patientSurveys.map((v) => {
+          return { ...v, completed: false, type: "patient" };
+        }),
+        ...treatment.doctorSurveys.map((v) => {
+          return { ...v, completed: false, type: "doctor" };
+        }),
+      ];
+      this.appointment.surveyRequiredCount = this.appointment.surveys.length;
+      this.appointment.surveyCount = 0;
       await this.addAppointment(this.appointment);
       this.loader = false;
       setTimeout(() => {
@@ -131,7 +156,30 @@ export default {
         this.treatment = null;
       }, 2000);
     },
+    formatDate(date) {
+      if (!date) return null;
+
+      const year = date.getFullYear(),
+        month = String(date.getDate()).padStart(2, "0"),
+        day = String(date.getMonth() + 1).padStart(2, "0");
+      return `${day}-${month}-${year}`;
+    },
   },
-  computed: mapGetters(["getSurveyAlert", "getPatients", "getTreatments"]),
+  computed: {
+    ...mapGetters(["getSurveyAlert", "getPatients", "getDoctors", "getTreatments"]),
+    computedDateFormatted: {
+      get() {
+        return this.formatDate(this.appointment.date);
+      },
+      set(val) {
+        this.appointment.date = val;
+      },
+    },
+  },
+  watch: {
+    dateDisplay(val) {
+      this.appointment.date = new Date(Date.parse(val));
+    },
+  },
 };
 </script>

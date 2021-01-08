@@ -23,7 +23,7 @@
         <v-list-item-content>
           <v-list-item-title>{{ survey.name }}</v-list-item-title>
           <v-list-item-subtitle
-            >{{ survey.date }}<br />
+            >{{ timeText }}<br />
             {{
               survey.description.length > 0 ? survey.description : "Brak opisu"
             }}</v-list-item-subtitle
@@ -153,7 +153,7 @@ export default {
     valid: true,
   }),
   methods: {
-    ...mapActions(["submitSurvey", 'downloadSurvey']),
+    ...mapActions(["submitSurvey", "downloadSurvey"]),
     async submitClick() {
       if (!this.$refs.form.validate()) return;
       this.loader = true;
@@ -194,7 +194,25 @@ export default {
       a.dispatchEvent(e);
     },
   },
-  computed: mapGetters(["getSurveyAlert", "getUserData"]),
+  computed: {
+    ...mapGetters(["getSurveyAlert", "getUserData"]),
+    timeText() {
+      let date;
+      if (this.survey.completed) {
+        this.survey.submitted instanceof Date
+          ? (date = this.survey.submitted)
+          : (date = this.survey.submitted.toDate());
+      } else {
+        date = this.survey.sent.toDate();
+      }
+      let dd = String(date.getDate()).padStart(2, "0");
+      let mm = String(date.getMonth() + 1).padStart(2, "0");
+      let yy = date.getFullYear();
+      return `${
+        this.survey.completed ? "Wypełniona" : "Wysłana"
+      } ${dd}-${mm}-${yy}`;
+    },
+  },
   components: {
     SendSurvey,
   },

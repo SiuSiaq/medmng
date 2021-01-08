@@ -10,6 +10,7 @@ import Appointments from '@/views/Appointments'
 import Patients from '@/views/Patients'
 import Login from '@/views/Login'
 import Register from '@/views/Register'
+import RegisterDoctor from '@/views/RegisterDoctor'
 
 Vue.use(VueRouter)
 
@@ -82,6 +83,14 @@ const routes = [
     path: '/register',
     name: 'Register',
     component: Register,
+    meta: {
+      requiresGuest: true,
+    },
+  },
+  {
+    path: '/registerdoctor',
+    name: 'RegisterDoctor',
+    component: RegisterDoctor,
     meta: {
       requiresGuest: true,
     },

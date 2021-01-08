@@ -15,7 +15,6 @@
             prepend-icon="mdi-account-search-outline"
           ></v-autocomplete>
           <v-list
-            v-if="!$vuetify.breakpoint.mobile"
             three-line
             style="height:76vh; overflow-y: scroll;"
           >
@@ -41,7 +40,7 @@
         </v-card>
       </v-col>
       <v-col cols="12" md="9">
-        <v-card  class="mt-5 mt-md-0 ml-md-5" height="100%" rounded="lg">
+        <v-card class="mt-5 mt-md-0 ml-md-5" height="100%" rounded="lg">
           <v-row class="pa-5">
             <v-col cols="6">
               <div class="caption">Imię</div>

@@ -1,6 +1,7 @@
 <template>
   <v-container fluid :class="$vuetify.breakpoint.mobile ? 'pa-0' : ''">
     <v-row no-gutters v-if="!$vuetify.breakpoint.mobile" style="height: 100%">
+      <CreateSurvey />
       <v-col cols="12" md="3">
         <v-card class="px-4 pt-2" rounded="lg" height="100%">
           <v-autocomplete
@@ -50,6 +51,7 @@
     </v-row>
 
     <div v-else class="surveysPage">
+      <CreateSurvey />
       <v-tabs v-model="tab" background-color="primary" color="white" grow>
         <v-tab v-for="item in ['Lista', 'Ankieta']" :key="item">
           {{ item }}
@@ -107,9 +109,11 @@
 <script>
 import { mapGetters, mapActions } from "vuex";
 import SurveyPreview from "@/components/SurveyPreview";
+import CreateSurvey from "@/components/CreateSurvey";
 export default {
   components: {
     SurveyPreview,
+    CreateSurvey,
   },
   data: () => ({
     tab: 0,

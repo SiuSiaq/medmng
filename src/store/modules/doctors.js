@@ -1,36 +1,36 @@
 
 const state = {
-    patients: [],
+    doctors: [],
 }
 
 const getters = {
-    getPatients: state => state.patients,
+    getDoctors: state => state.doctors,
 }
 
 const actions = {
-    async fetchPatients({ commit, rootState }) {
-        rootState.login.userData.instituteRef.collection('patients')
+    async fetchDoctors({ commit, rootState }) {
+        rootState.login.userData.instituteRef.collection('doctors')
             .onSnapshot(snapshot => {
                 snapshot.docChanges().forEach(change => {
                     if (change.type === 'added') {
-                        commit('patientAdded', {
+                        commit('doctorAdded', {
                             ...change.doc.data(),
                             id: change.doc.id,
                         });
                     }
                     if (change.type === 'modified') {
-                        console.log('Modified patient: ', change.doc.data());
+                        console.log('Modified doctor: ', change.doc.data());
                     }
                     if (change.type === 'removed') {
-                        commit('patientRemoved', change.doc.id)
+                        commit('doctorRemoved', change.doc.id)
                     }
                 });
             });
     },
-    async fetchPatientDataSurveys({ dispatch, rootState }, id) {
+    async fetchDoctorDataSurveys({ dispatch, rootState }, id) {
         try {
             let completed = [], incompleted = [];
-            const resCompleted = await rootState.login.userData.instituteRef.collection('patients').doc(id).collection('surveys').where('completed', '==', true).get();
+            const resCompleted = await rootState.login.userData.instituteRef.collection('doctors').doc(id).collection('surveys').where('completed', '==', true).get();
             resCompleted.forEach(doc => {
                 completed.push({
                     ...doc.data(),
@@ -38,7 +38,7 @@ const actions = {
                 })
             })
 
-            const resIncompleted = await rootState.login.userData.instituteRef.collection('patients').doc(id).collection('surveys').where('completed', '==', false).get();
+            const resIncompleted = await rootState.login.userData.instituteRef.collection('doctors').doc(id).collection('surveys').where('completed', '==', false).get();
             resIncompleted.forEach(doc => {
                 incompleted.push({
                     ...doc.data(),
@@ -58,9 +58,9 @@ const actions = {
 }
 
 const mutations = {
-    setPatients: (state, data) => state.patients = data,
-    patientAdded: (state, data) => state.patients.push(data),
-    patientRemoved: (state, id) => state.patients = state.patients.filter(v => v.id !== id),
+    setDoctors: (state, data) => state.doctors = data,
+    doctorAdded: (state, data) => state.doctors.push(data),
+    doctorRemoved: (state, id) => state.doctors = state.doctors.filter(v => v.id !== id),
 }
 
 export default {
