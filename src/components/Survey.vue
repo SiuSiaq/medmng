@@ -83,6 +83,8 @@
               v-model="field.data"
             ></v-text-field>
             <v-select
+            item-text="text"
+            item-value="value"
               outlined
               v-else-if="field.type === 'select'"
               :rules="[(v) => !!v || `Pole jest wymagane`]"
@@ -170,7 +172,7 @@ export default {
       const blob = new Blob([data], { type: "text/plain" });
       const e = document.createEvent("MouseEvents"),
         a = document.createElement("a");
-      a.download = "test.json";
+      a.download = `${this.survey.name}.json`;
       a.href = window.URL.createObjectURL(blob);
       a.dataset.downloadurl = ["text/json", a.download, a.href].join(":");
       this.downloadLoader = false;
@@ -203,7 +205,7 @@ export default {
           ? (date = this.survey.submitted)
           : (date = this.survey.submitted.toDate());
       } else {
-        date = this.survey.sent.toDate();
+        date = this.survey.sentDate.toDate();
       }
       let dd = String(date.getDate()).padStart(2, "0");
       let mm = String(date.getMonth() + 1).padStart(2, "0");

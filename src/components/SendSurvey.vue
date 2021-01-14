@@ -13,6 +13,7 @@
         <v-form>
           <v-autocomplete
             outlined
+            no-data-text="Brak pacjentów w bazie"
             label="Pacjent"
             :rules="[(v) => !!v || `Pacjent jest wymagany`]"
             :items="getPatients"

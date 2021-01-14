@@ -3,7 +3,6 @@ import VueRouter from 'vue-router'
 import { auth } from '@/main'
 import Home from '@/views/Home'
 import Surveys from '@/views/Surveys'
-import CreateSurvey from '@/views/CreateSurvey'
 import Person from '@/views/Person'
 import Treatments from '@/views/Treatments'
 import Appointments from '@/views/Appointments'
@@ -27,14 +26,6 @@ const routes = [
     path: '/surveys',
     name: 'Surveys',
     component: Surveys,
-    meta: {
-      requiresAuth: true,
-    },
-  },
-  {
-    path: '/createsurvey',
-    name: 'CreateSurvey',
-    component: CreateSurvey,
     meta: {
       requiresAuth: true,
     },

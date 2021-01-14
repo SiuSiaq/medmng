@@ -141,7 +141,7 @@ export default {
       const blob = new Blob([data], { type: "text/plain" });
       const e = document.createEvent("MouseEvents"),
         a = document.createElement("a");
-      a.download = "test.json";
+      a.download = `${this.treatment.name}.json`;
       a.href = window.URL.createObjectURL(blob);
       a.dataset.downloadurl = [
         `${this.treatment.name}/json`,

@@ -14,10 +14,7 @@
             label="Pacjent"
             prepend-icon="mdi-account-search-outline"
           ></v-autocomplete>
-          <v-list
-            three-line
-            style="height:76vh; overflow-y: scroll;"
-          >
+          <v-list three-line style="height:76vh; overflow-y: scroll;">
             <v-list-item-group>
               <v-list-item
                 @click="selectedPatient = patient"
@@ -174,7 +171,9 @@
                     Brak ankiet do wypełnienia
                   </div>
                   <Survey
-                    v-for="survey in patientIncompleted"
+                    v-for="survey in patientIncompleted.sort((a, b) => {
+                      return a.sentDate.toDate() - b.sentDate.toDate();
+                    })"
                     :key="survey.id"
                     :survey="survey"
                   />
@@ -186,7 +185,9 @@
                     Brak wypełnionych ankiet
                   </div>
                   <Survey
-                    v-for="survey in patientCompleted"
+                    v-for="survey in patientCompleted.sort((a, b) => {
+                      return a.submitted.toDate() - b.submitted.toDate();
+                    })"
                     :key="survey.id"
                     :survey="survey"
                   />

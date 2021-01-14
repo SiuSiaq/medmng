@@ -1,3 +1,4 @@
+import { db } from '@/main'
 
 const state = {
     patients: [],
@@ -27,10 +28,10 @@ const actions = {
                 });
             });
     },
-    async fetchPatientDataSurveys({ dispatch, rootState }, id) {
+    async fetchPatientDataSurveys({ dispatch }, id) {
         try {
             let completed = [], incompleted = [];
-            const resCompleted = await rootState.login.userData.instituteRef.collection('patients').doc(id).collection('surveys').where('completed', '==', true).get();
+            const resCompleted = await db.collection('users').doc(id).collection('surveys').where('completed', '==', true).get();
             resCompleted.forEach(doc => {
                 completed.push({
                     ...doc.data(),
@@ -38,7 +39,7 @@ const actions = {
                 })
             })
 
-            const resIncompleted = await rootState.login.userData.instituteRef.collection('patients').doc(id).collection('surveys').where('completed', '==', false).get();
+            const resIncompleted = await db.collection('users').doc(id).collection('surveys').where('completed', '==', false).get();
             resIncompleted.forEach(doc => {
                 incompleted.push({
                     ...doc.data(),

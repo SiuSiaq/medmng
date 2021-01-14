@@ -38,43 +38,56 @@ const actions = {
             let appointmentRef = rootState.login.userData.wardRef.collection('appointments').doc()
             appointment.created = new Date()
             appointment.date = new Date(appointment.date)
-            appointment.patientRef = rootState.login.userData.instituteRef.collection('patients').doc(appointment.patientRef)
-            appointment.doctorRef = rootState.login.userData.instituteRef.collection('doctors').doc(appointment.doctorRef)
+            appointment.patientRef = db.collection('users').doc(appointment.patientRef)
+            appointment.doctorRef = db.collection('users').doc(appointment.doctorRef)
             appointment.treatmentRef = rootState.login.userData.wardRef.collection('treatments').doc(appointment.treatmentRef)
             appointment.surveys.forEach(survey => {
                 let appointmentSurveyRef = appointmentRef.collection('surveys').doc()
-                batch.set(appointmentSurveyRef, survey)
-                if (survey.timeType === 'Natychmiast') {
-                    if (survey.type === 'patient') {
-                        let ref = rootState.login.userData.instituteRef.collection('patients').doc(appointment.patientRef.id).collection('surveys').doc()
-                        let fullSurvey = rootState.surveys.surveys.find(s => s.id === survey.ref.id)
-                        if (fullSurvey) batch.set(ref, {
+                let fullSurvey = rootState.surveys.surveys.find(s => s.id === survey.ref.id)
+                if (fullSurvey) {
+                    let userRef;
+                    if (survey.type === 'patient')
+                        userRef = db.collection('users').doc(appointment.patientRef.id).collection('surveys').doc()
+                    else
+                        userRef = db.collection('users').doc(appointment.doctorRef.id).collection('surveys').doc()
+
+                    if (survey.timeType === 'Natychmiast') {
+                        batch.set(userRef, {
                             ...fullSurvey,
-                            sent: new Date(),
+                            sent: true,
+                            sentDate: new Date(),
                             appointmentRef,
                             appointmentSurveyRef,
                             surveyRef: survey.ref,
                         })
-                        survey.sent = new Date()
+                        survey.sentDate = new Date()
+                        survey.sent = true;
+                        survey.status = "sent"
                         survey.surveyRef = survey.ref
-                    }
-                    if (survey.type === 'doctor') {
-                        let ref = rootState.login.userData.instituteRef.collection('doctors').doc(appointment.doctorRef.id).collection('surveys').doc()
-                        let fullSurvey = rootState.surveys.surveys.find(s => s.id === survey.ref.id)
-                        if (fullSurvey) batch.set(ref, {
+
+                    } else {
+                        batch.set(db.collection('appointment_surveys').doc(appointmentSurveyRef.id), {
                             ...fullSurvey,
-                            sent: new Date(),
+                            sendDate: new Date(survey.sendDate.toDateString()),
+                            sent: false,
                             appointmentRef,
                             appointmentSurveyRef,
                             surveyRef: survey.ref,
+                            userRef,
                         })
-                        survey.sent = new Date()
+                        survey.status = "pending"
                         survey.surveyRef = survey.ref
                     }
+
+                    batch.set(appointmentSurveyRef, survey)
                 }
             })
+            delete appointment.surveys
+
             batch.set(appointmentRef, appointment)
+
             await batch.commit()
+
             dispatch('throwSurveyAlert', {
                 text: 'Umówiono zabieg',
                 success: true,

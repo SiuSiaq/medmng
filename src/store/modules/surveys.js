@@ -1,14 +1,14 @@
 import { db, increment } from "@/main"
 const state = {
     surveys: [],
-    patientSurveys: [],
+    userSurveys: [],
 }
 
 const getters = {
     getSurveys: state => state.surveys,
-    getPatientSurveys: state => state.patientSurveys,
-    getCompletedPatientSurveys: state => state.patientSurveys.filter(v => v.completed),
-    getIncompletedPatientSurveys: state => state.patientSurveys.filter(v => !v.completed),
+    getUserSurveys: state => state.userSurveys,
+    getCompletedUserSurveys: state => state.userSurveys.filter(v => v.completed),
+    getIncompletedUserSurveys: state => state.userSurveys.filter(v => !v.completed),
 }
 
 const actions = {
@@ -38,13 +38,13 @@ const actions = {
             console.error(error)
         }
     },
-    async fetchPatientSurveys({ commit, rootState }) {
+    async fetchUserSurveys({ commit, rootState }) {
         try {
             if (!rootState.login.user) {
                 console.log('No user')
                 return
             }
-            rootState.login.userData.instituteRef.collection('patients').doc(rootState.login.user.uid).collection('surveys')
+            db.collection('users').doc(rootState.login.user.uid).collection('surveys')
                 .onSnapshot(snapshot => {
                     snapshot.docChanges().forEach(change => {
                         if (change.type === 'added') {
@@ -74,7 +74,7 @@ const actions = {
             survey.submitted = new Date()
             const batch = db.batch()
 
-            const patientSurveyRef = rootState.login.userData.instituteRef.collection('patients').doc(rootState.login.user.uid).collection('surveys').doc(survey.id);
+            const patientSurveyRef = db.collection('users').doc(rootState.login.user.uid).collection('surveys').doc(survey.id);
             const surveyRef = survey.surveyRef;
 
             let data = {}
@@ -89,9 +89,10 @@ const actions = {
                 submitted: new Date(),
             })
 
-            if(survey.appointmentSurveyRef) {
+            if (survey.appointmentSurveyRef) {
                 batch.update(survey.appointmentSurveyRef, {
                     completed: true,
+                    status: "complete",
                     fields: survey.fields,
                     submitted: new Date(),
                     data,
@@ -103,7 +104,7 @@ const actions = {
                 submitted: new Date(),
             })
 
-            if(survey.appointmentRef) {
+            if (survey.appointmentRef) {
                 batch.update(survey.appointmentRef, {
                     surveyCount: increment,
                 })
@@ -126,7 +127,7 @@ const actions = {
     async createSurvey({ rootState, dispatch }, survey) {
         try {
             survey.date = new Date().toISOString().slice(0, 10)
-            survey.author = rootState.login.userData.instituteRef.collection('patients').doc(rootState.login.user.uid)
+            survey.author = rootState.login.userData.instituteRef.collection('doctors').doc(rootState.login.user.uid)
             survey.completed = false
             const res = await rootState.login.userData.wardRef.collection('surveys').add(survey)
             survey.id = res.id
@@ -144,13 +145,13 @@ const actions = {
     },
     async sendSurvey({ dispatch, rootState }, payload) {
         try {
-            await rootState.login.userData.instituteRef.collection('patients').doc(payload.id).collection('surveys').add({
+            await db.collection('users').doc(payload.id).collection('surveys').add({
                 ...payload.survey,
                 surveyRef: rootState.login.userData.wardRef.collection('surveys').doc(payload.survey.id),
                 sent: new Date(),
             })
             dispatch('throwSurveyAlert', {
-                text: 'Ankieta pomyślnie wysłana do pacjent',
+                text: 'Ankieta wysłana pomyślnie',
                 success: true,
             })
         } catch (error) {
@@ -178,13 +179,13 @@ const actions = {
 }
 
 const mutations = {
-    patientSurveyAdded: (state, data) => state.patientSurveys.unshift(data),
-    patientSurveyRemoved: (state, id) => state.patientSurveys = state.patientSurveys.filter(v => v.id !== id),
-    patientSurveyModified: (state, data) => state.patientSurveys.map((obj) => obj.id === data.id ? data : obj),
+    patientSurveyAdded: (state, data) => state.userSurveys.unshift(data),
+    patientSurveyRemoved: (state, id) => state.userSurveys = state.userSurveys.filter(v => v.id !== id),
+    patientSurveyModified: (state, data) => state.userSurveys.map((obj) => obj.id === data.id ? data : obj),
     surveyAdded: (state, data) => state.surveys.unshift(data),
     surveyRemoved: (state, id) => state.surveys = state.surveys.filter(v => v.id !== id),
     surveyModified: (state, data) => state.surveys.map((obj) => obj.id === data.id ? data : obj),
-    patientSurveysubmitted: (state, data) => state.patientSurveys.map((obj) => obj.id === data.id ? data : obj),
+    userSurveySubmitted: (state, data) => state.userSurveys.map((obj) => obj.id === data.id ? data : obj),
 }
 
 export default {

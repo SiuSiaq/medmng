@@ -7,7 +7,7 @@
     transition="dialog-bottom-transition"
   >
     <template v-slot:activator="{ on, attrs }">
-      <v-btn fixed bottom right fab color="primary" v-bind="attrs" v-on="on">
+      <v-btn class="mr-md-4 mb-md-4" fixed bottom right fab color="primary" v-bind="attrs" v-on="on">
         <v-icon large>mdi-plus-circle</v-icon>
       </v-btn>
     </template>
@@ -140,12 +140,32 @@ export default {
       this.appointment.treatmentRef = treatment.id;
       this.appointment.surveys = [
         ...treatment.patientSurveys.map((v) => {
-          return { ...v, completed: false, type: "patient" };
+          return { ...v, completed: false, status: "pending", type: "patient" };
         }),
         ...treatment.doctorSurveys.map((v) => {
-          return { ...v, completed: false, type: "doctor" };
+          return { ...v, completed: false, status: "pending", type: "doctor" };
         }),
       ];
+      this.appointment.surveys.forEach((survey) => {
+        switch (survey.timeType) {
+          case "Przed":
+            survey.sendDate = new Date(this.appointment.date);
+            survey.sendDate.setDate(survey.sendDate.getDate() - survey.days);
+            break;
+          case "Po":
+            survey.sendDate = new Date(this.appointment.date);
+            survey.sendDate.setDate(survey.sendDate.getDate() + survey.days);
+            break;
+          case "Natychmiast":
+            survey.sendDate = new Date();
+            break;
+          case "W dniu wykonania":
+            survey.sendDate = this.appointment.date;
+            break;
+          default:
+            break;
+        }
+      });
       this.appointment.surveyRequiredCount = this.appointment.surveys.length;
       this.appointment.surveyCount = 0;
       await this.addAppointment(this.appointment);
@@ -166,7 +186,12 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(["getSurveyAlert", "getPatients", "getDoctors", "getTreatments"]),
+    ...mapGetters([
+      "getSurveyAlert",
+      "getPatients",
+      "getDoctors",
+      "getTreatments",
+    ]),
     computedDateFormatted: {
       get() {
         return this.formatDate(this.appointment.date);

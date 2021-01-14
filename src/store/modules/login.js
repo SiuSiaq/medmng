@@ -17,7 +17,9 @@ const actions = {
         try {
             let decoded = peselDecode(userCredentials.pesel);
             let user = await auth.createUserWithEmailAndPassword(userCredentials.email, userCredentials.password);
-            console.log(`Register: ${user.user.uid}`);
+            await user.user.updateProfile({
+                displayName: `${userCredentials.name} ${userCredentials.surname}`
+            });
             if (user) {
                 commit('setIsLoggedIn', true);
                 commit('setUser', user.user);
@@ -58,8 +60,10 @@ const actions = {
                 await batch.commit();
 
                 let tmp = await db.collection('users').doc(user.user.uid).get();
-                let userData = tmp.data();
-                userData.uid = tmp.id;
+                let userData = {
+                    ...tmp.data(),
+                    id: tmp.id,
+                }
                 commit('setUserData', userData);
                 return true;
             }
@@ -73,7 +77,9 @@ const actions = {
         try {
             let decoded = peselDecode(userCredentials.pesel);
             let user = await auth.createUserWithEmailAndPassword(userCredentials.email, userCredentials.password);
-            console.log(`Register: ${user.user.uid}`);
+            await user.user.updateProfile({
+                displayName: `${userCredentials.name} ${userCredentials.surname}`
+            });
             if (user) {
                 commit('setIsLoggedIn', true);
                 commit('setUser', user.user);
@@ -135,8 +141,10 @@ const actions = {
                 commit('setIsLoggedIn', true);
                 commit('setUser', user.user);
                 let tmp = await db.collection('users').doc(user.user.uid).get();
-                let userData = tmp.data();
-                userData.uid = tmp.id;
+                let userData = {
+                    ...tmp.data(),
+                    id: tmp.id,
+                }
                 commit('setUserData', userData);
             }
             else return false;
@@ -181,12 +189,12 @@ const actions = {
                     uid: tmp.id,
                 }
                 commit('setUserData', userData);
+                dispatch('fetchUserSurveys');
                 if (userData.doctor) {
                     dispatch('fetchTreatments');
                     dispatch('fetchPatients');
                     dispatch('fetchDoctors');
                     dispatch('fetchSurveys');
-                    dispatch('fetchPatientSurveys');
                     dispatch('fetchAppointments');
                 }
 

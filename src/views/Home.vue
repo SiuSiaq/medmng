@@ -1,47 +1,48 @@
 <template>
-  <v-container fluid :class="$vuetify.breakpoint.mobile ? 'pa-0' : ''">
-    <v-card
-      v-if="!$vuetify.breakpoint.mobile"
-      class="mx-auto mt-16"
-      max-width="1100"
-      elevation="24"
-      rounded="xl"
-    >
-      <v-card-title class="text-h4 grey--text text--darken-2"
-        >Ankiety</v-card-title
-      >
-      <v-card-text style="min-height: 300px">
+  <v-container
+    class="homePage pa-0"
+    fluid
+  >
+    <div v-if="!$vuetify.breakpoint.mobile" style="width: 100%; height: 100px;" class="primary mx-0 pt-4 pl-6">
+      <div class="text-h3 font-weight-medium white--text">Ankiety</div>
+    </div>
+    <v-row v-if="!$vuetify.breakpoint.mobile" class="mx-auto mt-3 px-5" max-width="1100">
+      <v-col cols="12" md="6">
+        <div class="text-h6 font-weight-regular">Do wypełnienia</div>
         <v-list two-line>
           <v-list-item-group>
-            <v-subheader>Do wypełnienia</v-subheader>
             <div
               class="text-subtitle-1 ml-5"
-              v-if="getIncompletedPatientSurveys.length === 0"
+              v-if="getIncompletedUserSurveys.length === 0"
             >
               Brak ankiet do wypełnienia
             </div>
             <Survey
-              v-for="survey in getIncompletedPatientSurveys"
+              v-for="survey in getIncompletedUserSurveys"
               :key="survey.id"
               :survey="survey"
-            />
-            <v-subheader>Wypełnione</v-subheader>
+            /> </v-list-item-group
+        ></v-list>
+      </v-col>
+      <v-col cols="12" md="6">
+        <div class="text-h6 font-weight-regular">Wypełnione</div>
+        <v-list two-line>
+          <v-list-item-group>
             <div
               class="text-subtitle-1 ml-5"
-              v-if="getCompletedPatientSurveys.length === 0"
+              v-if="getCompletedUserSurveys.length === 0"
             >
               Brak wypełnionych ankiet
             </div>
             <Survey
-              v-for="survey in getCompletedPatientSurveys"
+              v-for="survey in getCompletedUserSurveys"
               :key="survey.id"
               :survey="survey"
-            />
-          </v-list-item-group>
-        </v-list>
-      </v-card-text>
-    </v-card>
-    <div v-else class="homePage">
+            /> </v-list-item-group
+        ></v-list>
+      </v-col>
+    </v-row>
+    <div v-else>
       <v-tabs v-model="tab" background-color="primary" color="white" grow>
         <v-tab v-for="item in ['Do wypełnienia', 'Wypełnione']" :key="item">
           {{ item }}
@@ -54,12 +55,12 @@
             <v-list-item-group>
               <div
                 class="text-h6 text-center font-weight-regular"
-                v-if="getIncompletedPatientSurveys.length === 0"
+                v-if="getIncompletedUserSurveys.length === 0"
               >
                 Brak ankiet do wypełnienia
               </div>
               <Survey
-                v-for="survey in getIncompletedPatientSurveys"
+                v-for="survey in getIncompletedUserSurveys"
                 :key="survey.id"
                 :survey="survey"
               /> </v-list-item-group
@@ -70,12 +71,12 @@
             <v-list-item-group>
               <div
                 class="text-h6 text-center font-weight-regular"
-                v-if="getCompletedPatientSurveys.length === 0"
+                v-if="getCompletedUserSurveys.length === 0"
               >
                 Brak wypełnionych ankiet
               </div>
               <Survey
-                v-for="survey in getCompletedPatientSurveys"
+                v-for="survey in getCompletedUserSurveys"
                 :key="survey.id"
                 :survey="survey"
               />
@@ -98,11 +99,8 @@ export default {
     tab: 0,
   }),
   computed: {
-    ...mapGetters([
-      "getCompletedPatientSurveys",
-      "getIncompletedPatientSurveys",
-    ]),
-  }
+    ...mapGetters(["getCompletedUserSurveys", "getIncompletedUserSurveys"]),
+  },
 };
 </script>
 

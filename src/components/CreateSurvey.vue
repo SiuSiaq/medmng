@@ -29,19 +29,7 @@
         {{ getSurveyAlert.text }}
       </v-alert>
       <div class="mx-md-16 mt-md-10 mt-3">
-        <div
-          v-if="!create"
-          class="d-flex justify-center align-center"
-          style="height: 250px"
-        >
-          <v-btn v-if="!next" large color="primary" @click="create = true"
-            >stwórz ankietę</v-btn
-          >
-          <v-btn v-else large color="primary" @click="create = true"
-            >stwórz kolejną ankietę</v-btn
-          >
-        </div>
-        <div v-else>
+        <div>
           <v-row class="px-5">
             <v-col cols="12" md="6">
               <div class="d-flex justify-end">
@@ -90,12 +78,12 @@
               v-for="(field, i) in survey.fields"
               :key="i"
             >
-              <div
-                class="d-flex justify-end"
-              >
-                <v-btn color="error" text @click="survey.fields.splice(i, 1)">Usuń pole</v-btn>
+              <div class="d-flex justify-end">
+                <v-btn color="error" text @click="survey.fields.splice(i, 1)"
+                  >Usuń pole</v-btn
+                >
               </div>
-              <NewField :field="field" :number="i"/>
+              <NewField :field="field" :number="i" />
             </v-col>
           </v-row>
           <div class="d-flex px-5">
@@ -103,7 +91,11 @@
               >Dodaj pole</v-btn
             >
             <v-spacer></v-spacer>
-            <v-btn color="primary mb-5" @click="saveClick" :loading="loader"
+            <v-btn
+              color="primary mb-5"
+              :disabled="!valid"
+              @click="saveClick"
+              :loading="loader"
               >Utwórz ankietę</v-btn
             >
           </div>
@@ -123,7 +115,6 @@ export default {
   data: () => ({
     dialog: false,
     next: false,
-    create: false,
     loader: false,
     valid: true,
     survey: {
@@ -158,6 +149,15 @@ export default {
         options: [
           {
             text: "",
+            value: "",
+          },
+          {
+            text: "",
+            value: "",
+          },
+          {
+            text: "",
+            value: "",
           },
         ],
       });
@@ -167,8 +167,16 @@ export default {
       this.loader = true;
       this.next = true;
       this.survey.fields.forEach((field) => {
-        if (field.type !== "select" && field.type !== "radio")
+        if (field.type !== "select" && field.type !== "radio") {
           delete field.options;
+        } else {
+          if(field.options[0].value.length === 0) {
+            field.options.forEach(opt => {
+              opt.value = opt.text;
+            })
+          }
+        }
+          
       });
       await this.createSurvey(this.survey);
       this.loader = false;

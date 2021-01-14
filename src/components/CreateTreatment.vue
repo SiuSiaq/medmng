@@ -29,7 +29,12 @@
         {{ getSurveyAlert.text }}
       </v-alert>
 
-      <v-form class="mt-5 px-3" ref="form" v-model="valid">
+      <v-form
+        :readonly="readonly"
+        class="mt-5 px-3 mx-auto"
+        ref="form"
+        v-model="valid"
+      >
         <v-row class="mt-md-6 mt-4">
           <v-col cols="12">
             <div class="mx-auto">
@@ -75,6 +80,8 @@
                 item-text="name"
                 item-value="id"
                 clearable
+                :rules="[(v) => !!v || `Ankieta jest wymagana`]"
+                required
               >
               </v-autocomplete>
               <div class="d-flex">
@@ -85,6 +92,8 @@
                   flat
                   :items="['Przed', 'Po', 'Natychmiast', 'W dniu wykonania']"
                   v-model="item.timeType"
+                  :rules="[(v) => !!v || `Typ wysłania ankiety jest wymagany`]"
+                  required
                 ></v-select>
                 <v-text-field
                   style="max-width: 200px;"
@@ -93,12 +102,7 @@
                     item.timeType === 'Natychmiast' ||
                       item.timeType === 'W dniu wykonania'
                   "
-                  :rules="[(v) => !!v || `Czas wysłania jest wymagany`]"
                   v-model="item.days"
-                  :required="
-                    item.timeType === 'Natychmiast' ||
-                      item.timeType === 'W dniu wykonania'
-                  "
                 >
                 </v-text-field>
                 <v-spacer></v-spacer>
@@ -116,7 +120,7 @@
               class="ml-3"
               @click="
                 patientSurveys.push({
-                  itemType: 'Przed',
+                  timeType: 'Przed',
                   days: 0,
                   id: null,
                 })
@@ -138,6 +142,8 @@
                 item-text="name"
                 item-value="id"
                 clearable
+                :rules="[(v) => !!v || `Ankieta jest wymagana`]"
+                required
               >
               </v-autocomplete>
               <div class="d-flex">
@@ -148,7 +154,7 @@
                   flat
                   :items="['Przed', 'Po', 'Natychmiast', 'W dniu wykonania']"
                   v-model="item.timeType"
-                  :rules="[(v) => !!v || `Ankieta jest wymagana`]"
+                  :rules="[(v) => !!v || `Typ wysłania ankiety jest wymagany`]"
                   required
                 ></v-select>
                 <v-text-field
@@ -158,12 +164,7 @@
                     item.timeType === 'Natychmiast' ||
                       item.timeType === 'W dniu wykonania'
                   "
-                  :rules="[(v) => !!v || `Czas wysłania jest wymagany`]"
                   v-model="item.days"
-                  :required="
-                    item.timeType === 'Natychmiast' ||
-                      item.timeType === 'W dniu wykonania'
-                  "
                 >
                 </v-text-field>
                 <v-spacer></v-spacer>
@@ -181,7 +182,7 @@
               class="ml-3"
               @click="
                 doctorSurveys.push({
-                  itemType: 'Przed',
+                  timeType: 'Przed',
                   days: 0,
                   id: null,
                 })
@@ -217,6 +218,7 @@ export default {
       description: "",
       created: "",
     },
+    readonly: false,
     dialog: false,
     valid: true,
     patientSurveys: [],
@@ -234,10 +236,12 @@ export default {
     async createTreatmentClick() {
       if (!this.$refs.form.validate()) return;
       this.loader = true;
+      this.readonly = true;
 
       this.treatment.patientSurveys = [];
       if (this.patientSurveys.length > 0) {
         this.patientSurveys.forEach((item) => {
+          item.days = item.days ? parseInt(item.days) : 0;
           let el = this.getSurveys.find((e) => e.id === item.id);
           item.ref = this.getUserData.wardRef
             .collection("surveys")
@@ -250,6 +254,7 @@ export default {
       this.treatment.doctorSurveys = [];
       if (this.doctorSurveys.length > 0) {
         this.doctorSurveys.forEach((item) => {
+          item.days = item.days ? parseInt(item.days) : 0;
           let el = this.getSurveys.find((e) => e.id === item.id);
           item.ref = this.getUserData.wardRef
             .collection("surveys")
@@ -261,9 +266,10 @@ export default {
 
       await this.createTreatment(this.treatment);
       this.loader = false;
-      this.$refs.form.reset();
       setTimeout(() => {
         this.dialog = false;
+        this.readonly = false;
+        this.$refs.form.reset();
       }, 1500);
     },
   },
