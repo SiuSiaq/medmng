@@ -1,6 +1,6 @@
 <template>
   <v-container fluid :class="$vuetify.breakpoint.mobile ? 'pa-0' : ''">
-    <v-row no-gutters v-if="!$vuetify.breakpoint.mobile" style="height: 100%">
+    <v-row no-gutters v-if="!$vuetify.breakpoint.mobile" style="height: 100%;">
       <CreateSurvey />
       <v-col cols="12" md="3">
         <v-card class="px-4 pt-2" rounded="lg" height="100%">
@@ -15,7 +15,7 @@
             label="Ankieta"
             prepend-icon="mdi-account-search-outline"
           ></v-autocomplete>
-          <v-list three-line style="overflow-y: scroll;">
+          <v-list three-line class="surveyList">
             <v-list-item-group>
               <v-list-item
                 @click="selectedSurvey = survey"
@@ -44,7 +44,11 @@
         </v-card>
       </v-col>
       <v-col cols="12" md="9">
-        <v-card class="mt-5 mt-md-0 ml-md-5" rounded="lg" height="100%">
+        <v-card
+          class="mt-5 mt-md-0 ml-md-5 surveyPreview"
+          rounded="lg"
+          height="100%"
+        >
           <SurveyPreview :survey="selectedSurvey" />
         </v-card>
       </v-col>
@@ -96,9 +100,10 @@
                 </v-list-item-content>
               </v-list-item>
             </v-list-item-group>
-          </v-list> </v-tab-item
-        ><v-tab-item>
-          <div style="max-width: 100%">
+          </v-list>
+        </v-tab-item>
+        <v-tab-item>
+          <div style="max-width: 100%;">
             <SurveyPreview :survey="selectedSurvey" />
           </div> </v-tab-item
       ></v-tabs-items>
@@ -118,7 +123,9 @@ export default {
   data: () => ({
     tab: 0,
     first: false,
-    selectedSurvey: null,
+    selectedSurvey: {
+      description: "",
+    },
     searchSurveyId: null,
   }),
   methods: {
@@ -156,5 +163,27 @@ export default {
 .surveysPage {
   height: 100%;
   background: #fff;
+}
+
+.surveyPreview {
+  max-height: 87vh;
+  overflow-y: scroll;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.surveyPreview::-webkit-scrollbar {
+  display: none;
+}
+
+.surveyList {
+  overflow-y: scroll;
+  max-height: 74vh;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.surveyList::-webkit-scrollbar {
+  display: none;
 }
 </style>

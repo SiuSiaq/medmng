@@ -7,7 +7,16 @@
     transition="dialog-bottom-transition"
   >
     <template v-slot:activator="{ on, attrs }">
-      <v-btn fixed bottom right fab color="primary" v-bind="attrs" v-on="on">
+      <v-btn
+        class="mb-2 mr-2"
+        fixed
+        bottom
+        right
+        fab
+        color="primary"
+        v-bind="attrs"
+        v-on="on"
+      >
         <v-icon large>mdi-plus-circle</v-icon>
       </v-btn>
     </template>
@@ -70,6 +79,19 @@
                   label="Opis ankiety (opcjonalny)"
                 >
                 </v-textarea>
+                <div class="d-flex mt-n3">
+                  <v-checkbox
+                    v-model="survey.summable"
+                    label="Podsumowalna"
+                  ></v-checkbox>
+                  <div :hidden="!survey.summable">
+                    <v-checkbox
+                      v-model="groupSummable"
+                      label="Grupowe sumowanie"
+                      class="ml-3"
+                    ></v-checkbox>
+                  </div>
+                </div>
               </v-form>
             </v-col>
             <v-col
@@ -79,6 +101,9 @@
               :key="i"
             >
               <div class="d-flex justify-end">
+                <v-btn text color="primary" @click="copyFliedClick(i)"
+                  >Kopiuj pole</v-btn
+                >
                 <v-btn color="error" text @click="survey.fields.splice(i, 1)"
                   >Usuń pole</v-btn
                 >
@@ -122,7 +147,10 @@ export default {
       treatment: "",
       description: "",
       fields: [],
+      summable: false,
+      groupSummable: false,
     },
+    groupSummable: false,
     nameRules: [
       (v) => !!v || "Nazwa ankiety jest wymagana",
       (v) =>
@@ -141,6 +169,8 @@ export default {
     ...mapActions(["createSurvey"]),
     addFliedClick() {
       this.survey.fields.push({
+        group: null,
+        groupSummable: this.survey.groupSummable && this.survey.summable,
         data: null,
         name: "",
         description: "",
@@ -162,6 +192,10 @@ export default {
         ],
       });
     },
+    copyFliedClick(i) {
+      let copiedField = Object.assign({}, this.survey.fields[i]);
+      this.survey.fields.splice(i + 1, 0, copiedField);
+    },
     async saveClick() {
       if (!this.$refs.surveyForm.validate()) return;
       this.loader = true;
@@ -170,13 +204,12 @@ export default {
         if (field.type !== "select" && field.type !== "radio") {
           delete field.options;
         } else {
-          if(field.options[0].value.length === 0) {
-            field.options.forEach(opt => {
+          if (field.options[0].value.length === 0) {
+            field.options.forEach((opt) => {
               opt.value = opt.text;
-            })
+            });
           }
         }
-          
       });
       await this.createSurvey(this.survey);
       this.loader = false;
@@ -186,7 +219,6 @@ export default {
         description: "",
         fields: [],
       };
-      this.create = false;
     },
     deleteSurveyClick() {
       this.survey = {
@@ -195,7 +227,14 @@ export default {
         description: "",
         fields: [],
       };
-      this.create = false;
+    },
+  },
+  watch: {
+    groupSummable(val) {
+      this.survey.groupSummable = val;
+      this.survey.fields.forEach((field) => {
+        field.groupSummable = val;
+      });
     },
   },
 };

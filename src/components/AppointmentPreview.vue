@@ -2,16 +2,13 @@
   <v-row class="pt-5 px-3 pl-5" style="max-width: 100%">
     <v-col cols="12" md="6">
       <div class="caption">Pacjent</div>
-      <div class="mb-2">{{ appointment.patient }}</div>
+      <div class="mb-2">{{ appointment.patient ? appointment.patient : appointment.patientPesel }}</div>
       <div class="caption">Zabieg</div>
       <div class="mb-2">{{ appointment.name }}</div>
       <div class="caption">Termin</div>
       <div class="mb-6">
         {{
-          appointment.date
-            .toDate()
-            .toISOString()
-            .slice(0, 10)
+          appointment.date ? timeText(appointment.date.toDate()) : ''
         }}
       </div>
     </v-col>
@@ -86,35 +83,15 @@
           <div class="text-subtitle-1 ml-5" v-if="false">
             Brak wypełnionych ankiet
           </div>
-          <v-list-item
+          <SurveyAppointment
             v-for="survey in surveys
               .filter((v) => v.status == 'complete')
               .sort((a, b) => {
                 return a.sendDate.toDate() - b.sendDate.toDate();
               })"
             :key="survey.id"
-          >
-            <v-list-item-avatar>
-              <v-icon class="success white--text">
-                {{
-                  survey.type === "doctor"
-                    ? "mdi-doctor"
-                    : "mdi-account-outline"
-                }}
-              </v-icon>
-            </v-list-item-avatar>
-            <v-list-item-content>
-              <v-list-item-title>{{ survey.name }}</v-list-item-title>
-              <v-list-item-subtitle>
-                <v-list-item-subtitle
-                  >Wypełniona:
-                  {{
-                    timeText(survey.submitted.toDate())
-                  }}</v-list-item-subtitle
-                ></v-list-item-subtitle
-              >
-            </v-list-item-content>
-          </v-list-item>
+            :survey="survey"
+          />
         </v-list-item-group>
       </v-list>
     </v-col>
@@ -123,8 +100,12 @@
 
 <script>
 import { mapActions, mapGetters } from "vuex";
+import SurveyAppointment from '@/components/SurveyAppointment';
 export default {
   props: ["appointment"],
+  components: {
+    SurveyAppointment,
+  },
   data: () => ({
     dialog: false,
     surveys: [],
@@ -133,7 +114,7 @@ export default {
     ...mapActions(["fetchAppointmentSurveys"]),
     async loadSurveys() {
       this.surveys = [];
-      if (this.appointment)
+      if (this.appointment.id)
         this.surveys = await this.fetchAppointmentSurveys(this.appointment.id);
     },
     timeText(date) {

@@ -70,6 +70,7 @@ const actions = {
     },
     async submitSurvey({ rootState, dispatch }, survey) {
         try {
+            if(!survey.sum) survey.sum = 0;
             survey.completed = true
             survey.submitted = new Date()
             const batch = db.batch()
@@ -81,12 +82,13 @@ const actions = {
             survey.fields.forEach(v => {
                 data[v.columnName] = v.data
             })
-
-
+            
             batch.update(patientSurveyRef, {
                 completed: true,
                 fields: survey.fields,
                 submitted: new Date(),
+                sum: survey.sum,
+                groupSummable: survey.groupSummable,
             })
 
             if (survey.appointmentSurveyRef) {
@@ -95,6 +97,8 @@ const actions = {
                     status: "complete",
                     fields: survey.fields,
                     submitted: new Date(),
+                    sum: survey.sum,
+                    groupSummable: survey.groupSummable,
                     data,
                 })
             }
@@ -148,7 +152,8 @@ const actions = {
             await db.collection('users').doc(payload.id).collection('surveys').add({
                 ...payload.survey,
                 surveyRef: rootState.login.userData.wardRef.collection('surveys').doc(payload.survey.id),
-                sent: new Date(),
+                sent: true,
+                sentDate: new Date(),
             })
             dispatch('throwSurveyAlert', {
                 text: 'Ankieta wysłana pomyślnie',

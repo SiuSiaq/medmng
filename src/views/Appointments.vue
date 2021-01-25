@@ -1,6 +1,6 @@
 <template>
   <v-container fluid :class="$vuetify.breakpoint.mobile ? 'pa-0' : ''">
-    <CreateAppointment/>
+    <CreateAppointment />
     <v-row no-gutters v-if="!$vuetify.breakpoint.mobile" style="height: 100%">
       <v-col cols="12" md="3">
         <v-card class="px-4 pt-2" rounded="lg" height="100%">
@@ -15,7 +15,7 @@
             label="Zaplanowany zabieg"
             prepend-icon="mdi-account-search-outline"
           ></v-autocomplete>
-          <v-list three-line style="overflow-y: scroll;">
+          <v-list three-line class="appointmentList">
             <v-list-item-group>
               <v-list-item
                 @click="selectedAppointment = appointment"
@@ -36,8 +36,12 @@
                         .toISOString()
                         .slice(0, 10)
                     }}<br />
-                    {{ appointment.patient }}</v-list-item-subtitle
-                  >
+                    {{
+                      appointment.patient
+                        ? appointment.patient
+                        : appointment.patientPesel
+                    }}
+                  </v-list-item-subtitle>
                 </v-list-item-content>
               </v-list-item>
             </v-list-item-group>
@@ -46,7 +50,7 @@
       </v-col>
       <v-col cols="12" md="9">
         <v-card
-          class="mt-5 mt-md-0 ml-md-5 overflow-y: scroll;"
+          class="mt-5 mt-md-0 ml-md-5 appointmentPreview"
           rounded="lg"
           height="100%"
         >
@@ -96,8 +100,12 @@
                         .toISOString()
                         .slice(0, 10)
                     }}<br />
-                    {{ appointment.patient }}</v-list-item-subtitle
-                  >
+                    {{
+                      appointment.patient
+                        ? appointment.patient
+                        : appointment.patientPesel
+                    }}
+                  </v-list-item-subtitle>
                 </v-list-item-content>
               </v-list-item>
             </v-list-item-group>
@@ -123,7 +131,7 @@ export default {
   data: () => ({
     tab: 0,
     first: false,
-    selectedAppointment: null,
+    selectedAppointment: {},
     searchAppointmentId: null,
   }),
   methods: {
@@ -161,5 +169,26 @@ export default {
 .appointmentsPage {
   height: 100%;
   background: #fff;
+}
+.appointmentPreview {
+  max-height: 87vh;
+  overflow-y: scroll;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.appointmentPreview::-webkit-scrollbar {
+  display: none;
+}
+
+.appointmentList {
+  overflow-y: scroll;
+  max-height: 74vh;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.appointmentList::-webkit-scrollbar {
+  display: none;
 }
 </style>

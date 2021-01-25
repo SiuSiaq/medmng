@@ -7,8 +7,8 @@
       ></v-app-bar-nav-icon>
 
       <v-toolbar-title class="text-uppercase font-weight-bold white--text">
-        Med
-        <span class="font-weight-light">Mng</span>
+        med
+        <span class="font-weight-light">form+</span>
       </v-toolbar-title>
       <v-spacer></v-spacer>
     </v-app-bar>

@@ -9,24 +9,18 @@
     <template v-slot:activator="{ on, attrs }">
       <v-list-item v-bind="attrs" v-on="on">
         <v-list-item-avatar>
-          <v-icon
-            :class="survey.completed ? 'success' : 'warning'"
-            class="white--text"
-          >
+          <v-icon class="success white--text">
             {{
-              survey.completed
-                ? "mdi-clipboard-check-outline"
-                : "mdi-clipboard-edit-outline"
+              survey.type === "doctor" ? "mdi-doctor" : "mdi-account-outline"
             }}
           </v-icon>
         </v-list-item-avatar>
         <v-list-item-content>
           <v-list-item-title>{{ survey.name }}</v-list-item-title>
-          <v-list-item-subtitle
-            >{{ timeText }}<br />
-            {{
-              survey.description.length > 0 ? survey.description : "Brak opisu"
-            }}</v-list-item-subtitle
+          <v-list-item-subtitle>
+            <v-list-item-subtitle
+              >{{ timeText }}</v-list-item-subtitle
+            ></v-list-item-subtitle
           >
         </v-list-item-content>
       </v-list-item>
@@ -53,7 +47,7 @@
           {{ survey.name }}
         </div>
         <v-form
-          :readonly="survey.completed || sendable"
+          readonly
           v-model="valid"
           ref="form"
           style="max-width: 700px"
@@ -62,41 +56,26 @@
           <div class="caption">Opis</div>
           <div class="mb-2">
             {{
-              survey.description.length > 0 ? survey.description : "Brak opisu"
+              survey.description
+                ? survey.description.length > 0
+                  ? survey.description
+                  : "Brak opisu"
+                : "Brak opisu"
             }}
           </div>
           <div
             v-if="
               survey.completed &&
                 survey.sum &&
-                survey.summable &&
+                survey.sum > 0 &&
                 getUserData.doctor
             "
           >
             <div class="caption">Suma</div>
             <div class="mb-2">{{ survey.sum }}</div>
           </div>
-          <div
-            v-if="
-              survey.completed &&
-                survey.groupSummable &&
-                survey.summable &&
-                getUserData.doctor
-            "
-          >
-            <div class="caption">Suma grupowa</div>
-            <div v-for="(groupKey, i) in Object.keys(survey.groupSum)" :key="i" class="ml-1 mb-1">
-              <div class="caption">Grupa {{ groupKey }}</div>
-              <div>{{ survey.groupSum[groupKey] }}</div>
-            </div>
-          </div>
           <div v-for="(field, i) in survey.fields" :key="i">
-            <div>
-              {{ i + 1 + ") " + field.name }}
-            </div>
-            <div v-if="field.description">
-              <div class="caption">{{ field.description }}</div>
-            </div>
+            <div class="caption">{{ i + 1 + ". " + field.name }}</div>
             <v-text-field
               outlined
               v-if="field.type === 'number'"
@@ -147,23 +126,8 @@
             </v-radio-group>
           </div>
           <div class="d-flex">
-            <v-btn
-              v-if="getUserData.doctor && sendable"
-              color="primary"
-              :loading="downloadLoader"
-              @click="downloadClick"
-              >Pobierz</v-btn
-            >
             <v-spacer></v-spacer>
-            <SendSurvey :survey="survey" v-if="sendable" />
-            <v-btn
-              v-else-if="!survey.completed"
-              color="primary"
-              :loading="loader"
-              @click.prevent="submitClick"
-              >Wyślij</v-btn
-            >
-            <v-btn v-else color="primary" @click.prevent="dialog = false"
+            <v-btn color="primary" @click.prevent="dialog = false"
               >Zamknij</v-btn
             >
           </div>
@@ -174,60 +138,17 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from "vuex";
-import SendSurvey from "@/components/SendSurvey";
+import { mapGetters } from "vuex";
 export default {
-  props: ["survey", "sendable"],
+  props: ["survey"],
   data: () => ({
     dialog: false,
     loader: false,
-    downloadLoader: false,
     valid: true,
   }),
   methods: {
-    ...mapActions(["submitSurvey", "downloadSurvey"]),
-    async submitClick() {
-      if (!this.$refs.form.validate()) return;
-      this.loader = true;
-      if (this.survey.summable && !this.survey.groupSummable)
-        this.survey.sum = this.sumSurvey();
-      if (this.survey.summable && this.survey.groupSummable)
-        this.survey.groupSum = this.sumGroupSurvey();
-      await this.submitSurvey(this.survey);
-      this.loader = false;
-    },
     reset() {
       this.$refs.form.reset();
-    },
-    async downloadClick() {
-      this.downloadLoader = true;
-      let surveysData = await this.downloadSurvey(this.survey.id);
-      const data = JSON.stringify(surveysData);
-      const blob = new Blob([data], { type: "text/plain" });
-      const e = document.createEvent("MouseEvents"),
-        a = document.createElement("a");
-      a.download = `${this.survey.name}.json`;
-      a.href = window.URL.createObjectURL(blob);
-      a.dataset.downloadurl = ["text/json", a.download, a.href].join(":");
-      this.downloadLoader = false;
-      e.initEvent(
-        "click",
-        true,
-        false,
-        window,
-        0,
-        0,
-        0,
-        0,
-        0,
-        false,
-        false,
-        false,
-        false,
-        0,
-        null
-      );
-      a.dispatchEvent(e);
     },
     sumSurvey() {
       let sum = 0;
@@ -240,24 +161,6 @@ export default {
         }
       });
       return sum;
-    },
-    sumGroupSurvey() {
-      let groupSums = {};
-      this.survey.fields.forEach((field) => {
-        if (field.type === "number") {
-          groupSums[field.group]
-            ? (groupSums[field.group] += parseInt(field.data))
-            : (groupSums[field.group] = parseInt(field.data));
-        }
-        if (field.type === "select") {
-          if (!isNaN(parseInt(field.data))) {
-            groupSums[field.group]
-              ? (groupSums[field.group] += parseInt(field.data))
-              : (groupSums[field.group] = parseInt(field.data));
-          }
-        }
-      });
-      return groupSums;
     },
   },
   computed: {
@@ -278,9 +181,6 @@ export default {
         this.survey.completed ? "Wypełniona" : "Wysłana"
       } ${dd}-${mm}-${yy}`;
     },
-  },
-  components: {
-    SendSurvey,
   },
 };
 </script>

@@ -43,13 +43,14 @@ const actions = {
                 })
 
                 batch.set(db.collection('users').doc(user.user.uid), {
+                    pesel: userCredentials.pesel,
                     email: userCredentials.email,
                     fullname: `${userCredentials.name} ${userCredentials.surname}`,
                     name: userCredentials.name,
                     surname: userCredentials.surname,
                     phone: userCredentials.phone,
                     address: userCredentials.address,
-                    local_number: userCredentials.local_number === undefined ? null : userCredentials.local_number,
+                    local_number: !userCredentials.local_number ? null : userCredentials.local_number,
                     birthday: decoded.date,
                     sex: decoded.sex,
                     registered: new Date(),
@@ -104,6 +105,7 @@ const actions = {
                 })
 
                 batch.set(db.collection('users').doc(user.user.uid), {
+                    pesel: userCredentials.pesel,
                     email: userCredentials.email,
                     fullname: `${userCredentials.name} ${userCredentials.surname}`,
                     name: userCredentials.name,

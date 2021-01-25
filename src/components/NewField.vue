@@ -19,6 +19,17 @@
         label="Nazwa kolumny"
         required
       ></v-text-field>
+      <div :hidden="!field.groupSummable">
+      <v-text-field
+        outlined
+        class="mb-2"
+        v-model="field.group"
+        :counter="250"
+        :rules="groupRules"
+        label="Grupa"
+        required
+      ></v-text-field>
+      </div>
       <v-textarea
         outlined
         rows="1"
@@ -39,7 +50,7 @@
           item-value="val"
         >
         </v-select>
-        <div :hidden="type > 4 || type < 3">
+        <div :hidden="type != 3">
           <v-checkbox
             v-model="checkboxValues"
             label="Wartości"
@@ -98,6 +109,10 @@ export default {
         (v && v.length <= 250) ||
         "Nazwa kolumny musi być krótsza niż 250 znaków",
     ],
+    groupRules: [
+      (v) =>
+        (v && v.length <= 250) || "Nazwa grupy musi być krótsza niż 250 znaków",
+    ],
     description: "",
     type: 1,
     types: [
@@ -136,6 +151,43 @@ export default {
   computed: {
     question() {
       return `Pytanie ${this.number + 1}`;
+    },
+  },
+  mounted() {
+    switch (this.field.type) {
+      case "text":
+        this.type = 1;
+        break;
+      case "number":
+        this.type = 2;
+        break;
+      case "select":
+        this.type = 3;
+        this.copyOptions();
+        break;
+      case "radio":
+        this.type = 4;
+        this.copyOptions();
+        break;
+      case "truefalse":
+        this.type = 5;
+        break;
+      default:
+        this.type = 1;
+        break;
+    }
+  },
+  methods: {
+    copyOptions() {
+      let options = this.field.options.slice();
+      let arr = [];
+      options.forEach((opt) => {
+        arr.push({
+          text: opt.text,
+          value: opt.value,
+        });
+      });
+      this.field.options = arr;
     },
   },
 };

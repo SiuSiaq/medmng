@@ -7,7 +7,16 @@
     transition="dialog-bottom-transition"
   >
     <template v-slot:activator="{ on, attrs }">
-      <v-btn class="mr-md-4 mb-md-4" fixed bottom right fab color="primary" v-bind="attrs" v-on="on">
+      <v-btn
+        class="mb-2 mr-2"
+        fixed
+        bottom
+        right
+        fab
+        color="primary"
+        v-bind="attrs"
+        v-on="on"
+      >
         <v-icon large>mdi-plus-circle</v-icon>
       </v-btn>
     </template>
@@ -35,17 +44,36 @@
         ref="form"
         v-model="valid"
       >
-        <div class="caption">Pacjent</div>
-        <v-autocomplete
-          no-data-text="Brak pacjentów"
-          outlined
-          :rules="[(v) => !!v || `Pacjent jest wymagany`]"
-          :items="getPatients"
-          v-model="patient"
-          item-text="fullname"
-          item-value="id"
-        >
-        </v-autocomplete>
+        <v-checkbox
+          v-model="nonRegistered"
+          label="Niezarejestrowany pacjent"
+        ></v-checkbox>
+
+        <div :hidden="nonRegistered">
+          <div class="caption">Pacjent</div>
+          <v-autocomplete
+            no-data-text="Brak pacjentów"
+            outlined
+            :rules="[(v) => !!v || `Pacjent jest wymagany`]"
+            :items="getPatients"
+            v-model="patient"
+            item-text="fullname"
+            item-value="id"
+          >
+          </v-autocomplete>
+        </div>
+
+        <div :hidden="!nonRegistered">
+          <div class="caption">PESEL pacjenta</div>
+          <v-text-field
+            counter="11"
+            outlined
+            :rules="peselRules"
+            v-model="patientPesel"
+          >
+          </v-text-field>
+        </div>
+
         <div class="caption">Doktor</div>
         <v-autocomplete
           no-data-text="Brak doktorów"
@@ -89,6 +117,7 @@
             ></v-text-field>
           </template>
           <v-date-picker
+            locale="pl-PL"
             v-model="dateDisplay"
             no-title
             scrollable
@@ -113,6 +142,8 @@
 import { mapActions, mapGetters } from "vuex";
 export default {
   data: () => ({
+    patientPesel: null,
+    nonRegistered: false,
     dateDisplay: new Date().toISOString().slice(0, 10),
     loader: false,
     dialog: false,
@@ -124,18 +155,29 @@ export default {
       date: new Date(),
     },
     menu: false,
+    peselRules: [
+      (v) => !!v || "PESEL pacjenta jest wymagany",
+      (v) => /^\d{11}$/.test(v) || "Niepoprawny numer PESEL",
+    ],
   }),
   methods: {
     ...mapActions(["addAppointment"]),
     async addClick() {
-      if (!this.patient || !this.treatment) return;
+      if (!this.treatment) return;
       this.loader = true;
-      let patient = this.getPatients.find((v) => v.id === this.patient);
+      if (!this.nonRegistered) {
+        let patient = this.getPatients.find((v) => v.id === this.patient);
+        this.appointment.patient = patient.fullname;
+        this.appointment.patientRef = patient.id;
+        this.appointment.patientPesel = null;
+      } else {
+        this.appointment.patientPesel = this.patientPesel;
+        this.appointment.patient = null;
+        this.appointment.patientRef = null;
+      }
       let doctor = this.getDoctors.find((v) => v.id === this.doctor);
       let treatment = this.getTreatments.find((v) => v.id === this.treatment);
       this.appointment.name = treatment.name;
-      this.appointment.patient = patient.fullname;
-      this.appointment.patientRef = patient.id;
       this.appointment.doctorRef = doctor.id;
       this.appointment.treatmentRef = treatment.id;
       this.appointment.surveys = [
@@ -168,12 +210,14 @@ export default {
       });
       this.appointment.surveyRequiredCount = this.appointment.surveys.length;
       this.appointment.surveyCount = 0;
+      console.log('starting')
       await this.addAppointment(this.appointment);
       this.loader = false;
       setTimeout(() => {
         this.dialog = false;
         this.patient = null;
         this.treatment = null;
+        this.$refs.form.reset()
       }, 2000);
     },
     formatDate(date) {

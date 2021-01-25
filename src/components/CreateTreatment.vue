@@ -7,7 +7,7 @@
     transition="dialog-bottom-transition"
   >
     <template v-slot:activator="{ on, attrs }">
-      <v-btn fixed bottom right fab color="primary" v-bind="attrs" v-on="on">
+      <v-btn class="mb-2 mr-2" fixed bottom right fab color="primary" v-bind="attrs" v-on="on">
         <v-icon large>mdi-plus-circle</v-icon>
       </v-btn>
     </template>

@@ -2,7 +2,7 @@
   <v-container fluid :class="$vuetify.breakpoint.mobile ? 'pa-0' : ''">
     <v-row no-gutters v-if="!$vuetify.breakpoint.mobile">
       <v-col cols="12" md="3">
-        <v-card class="px-4 pt-2" rounded="lg">
+        <v-card class="px-4 pt-2" rounded="lg" height="100%" style="max-height: 87vh;">
           <v-autocomplete
             no-data-text="Brak pacjentów w bazie danych"
             @change="searchSelect"
@@ -14,7 +14,7 @@
             label="Pacjent"
             prepend-icon="mdi-account-search-outline"
           ></v-autocomplete>
-          <v-list three-line style="height:76vh; overflow-y: scroll;">
+          <v-list three-line class="patientList">
             <v-list-item-group>
               <v-list-item
                 @click="selectedPatient = patient"
@@ -37,7 +37,7 @@
         </v-card>
       </v-col>
       <v-col cols="12" md="9">
-        <v-card class="mt-5 mt-md-0 ml-md-5" height="100%" rounded="lg">
+        <v-card class="mt-5 mt-md-0 ml-md-5 patientPreview" height="100%" rounded="lg">
           <v-row class="pa-5">
             <v-col cols="6">
               <div class="caption">Imię</div>
@@ -171,9 +171,7 @@
                     Brak ankiet do wypełnienia
                   </div>
                   <Survey
-                    v-for="survey in patientIncompleted.sort((a, b) => {
-                      return a.sentDate.toDate() - b.sentDate.toDate();
-                    })"
+                    v-for="survey in patientIncompleted"
                     :key="survey.id"
                     :survey="survey"
                   />
@@ -185,9 +183,7 @@
                     Brak wypełnionych ankiet
                   </div>
                   <Survey
-                    v-for="survey in patientCompleted.sort((a, b) => {
-                      return a.submitted.toDate() - b.submitted.toDate();
-                    })"
+                    v-for="survey in patientCompleted"
                     :key="survey.id"
                     :survey="survey"
                   />
@@ -248,8 +244,12 @@ export default {
       if (val) {
         let surveys = await this.fetchPatientDataSurveys(val.id);
         if (surveys) {
-          this.patientCompleted = surveys.completed;
-          this.patientIncompleted = surveys.incompleted;
+          this.patientCompleted = [...surveys.completed].sort((a, b) => {
+            return a.sentDate.toDate() - b.sentDate.toDate();
+          });
+          this.patientIncompleted = [...surveys.incompleted].sort((a, b) => {
+            return a.sentDate.toDate() - b.sentDate.toDate();
+          });
         }
       }
     },
@@ -267,5 +267,26 @@ export default {
 .patientsPage {
   height: 100%;
   background: #fff;
+}
+.patientPreview {
+  max-height: 87vh;
+  overflow-y: scroll;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.patientPreview::-webkit-scrollbar {
+  display: none;
+}
+
+.patientList {
+  overflow-y: scroll;
+  max-height: 74vh;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.patientList::-webkit-scrollbar {
+  display: none;
 }
 </style>

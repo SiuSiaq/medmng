@@ -38,7 +38,9 @@ const actions = {
             let appointmentRef = rootState.login.userData.wardRef.collection('appointments').doc()
             appointment.created = new Date()
             appointment.date = new Date(appointment.date)
-            appointment.patientRef = db.collection('users').doc(appointment.patientRef)
+            if (appointment.patient) {
+                appointment.patientRef = db.collection('users').doc(appointment.patientRef)
+            }
             appointment.doctorRef = db.collection('users').doc(appointment.doctorRef)
             appointment.treatmentRef = rootState.login.userData.wardRef.collection('treatments').doc(appointment.treatmentRef)
             appointment.surveys.forEach(survey => {
@@ -47,26 +49,40 @@ const actions = {
                 if (fullSurvey) {
                     let userRef;
                     if (survey.type === 'patient')
-                        userRef = db.collection('users').doc(appointment.patientRef.id).collection('surveys').doc()
+                        userRef = appointment.patient ? db.collection('users').doc(appointment.patientRef.id).collection('surveys').doc() : null;
                     else
                         userRef = db.collection('users').doc(appointment.doctorRef.id).collection('surveys').doc()
 
                     if (survey.timeType === 'Natychmiast') {
-                        batch.set(userRef, {
-                            ...fullSurvey,
-                            sent: true,
-                            sentDate: new Date(),
-                            appointmentRef,
-                            appointmentSurveyRef,
-                            surveyRef: survey.ref,
-                        })
+                        console.log('sending')
+                        if (userRef) {
+                            batch.set(userRef, {
+                                ...fullSurvey,
+                                sent: true,
+                                sentDate: new Date(),
+                                appointmentRef,
+                                appointmentSurveyRef,
+                                surveyRef: survey.ref,
+                            })
+                        } else {
+                            batch.set(db.collection('pesel_surveys').doc(), {
+                                ...fullSurvey,
+                                sent: true,
+                                sentDate: new Date(),
+                                appointmentRef,
+                                appointmentSurveyRef,
+                                surveyRef: survey.ref,
+                                pesel: appointment.patientPesel,
+                            })
+                        }
+
                         survey.sentDate = new Date()
                         survey.sent = true;
                         survey.status = "sent"
                         survey.surveyRef = survey.ref
 
                     } else {
-                        batch.set(db.collection('appointment_surveys').doc(appointmentSurveyRef.id), {
+                        let newAppointmentSurvey = {
                             ...fullSurvey,
                             sendDate: new Date(survey.sendDate.toDateString()),
                             sent: false,
@@ -74,7 +90,11 @@ const actions = {
                             appointmentSurveyRef,
                             surveyRef: survey.ref,
                             userRef,
-                        })
+                        }
+                        if(!userRef) {
+                            newAppointmentSurvey.pesel = appointment.patientPesel;
+                        }
+                        batch.set(db.collection('appointment_surveys').doc(appointmentSurveyRef.id), newAppointmentSurvey)
                         survey.status = "pending"
                         survey.surveyRef = survey.ref
                     }

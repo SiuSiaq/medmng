@@ -1,9 +1,9 @@
 <template>
   <v-container fluid :class="$vuetify.breakpoint.mobile ? 'pa-0' : ''">
     <v-row no-gutters v-if="!$vuetify.breakpoint.mobile" style="height: 100%">
-      <CreateTreatment/>
+      <CreateTreatment />
       <v-col cols="12" md="3">
-        <v-card class="px-4 pt-2" rounded="lg" height="100%">
+        <v-card class="px-4 pt-2" style="max-height: 87vh;" rounded="lg" height="100%">
           <v-autocomplete
             no-data-text="Brak zabiegów w bazie danych"
             @change="searchSelect"
@@ -15,7 +15,7 @@
             label="Zabieg"
             prepend-icon="mdi-account-search-outline"
           ></v-autocomplete>
-          <v-list three-line style="overflow-y: scroll;">
+          <v-list three-line class="treatmentList">
             <v-list-item-group>
               <v-list-item
                 @click="selectedTreatment = treatment"
@@ -50,7 +50,7 @@
       </v-col>
       <v-col cols="12" md="9">
         <v-card
-          class="mt-5 mt-md-0 ml-md-5"
+          class="mt-5 mt-md-0 ml-md-5 treatmentPreview"
           rounded="lg"
           height="100%"
         >
@@ -60,7 +60,7 @@
     </v-row>
 
     <div v-else class="treatmentsPage">
-      <CreateTreatment/>
+      <CreateTreatment />
       <v-tabs v-model="tab" background-color="primary" color="white" grow>
         <v-tab v-for="item in ['Lista', 'Zabieg']" :key="item">
           {{ item }}
@@ -132,7 +132,10 @@ export default {
   data: () => ({
     tab: 0,
     first: false,
-    selectedTreatment: null,
+    selectedTreatment: {
+      patientSurveys: [],
+      doctorSurveys: [],
+    },
     searchTreatmentId: null,
   }),
   methods: {
@@ -170,5 +173,27 @@ export default {
 .treatmentsPage {
   height: 100%;
   background: #fff;
+}
+
+.treatmentPreview {
+  max-height: 87vh;
+  overflow-y: scroll;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.treatmentPreview::-webkit-scrollbar {
+  display: none;
+}
+
+.treatmentList {
+  overflow-y: scroll;
+  max-height: 74vh;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.treatmentList::-webkit-scrollbar {
+  display: none;
 }
 </style>
