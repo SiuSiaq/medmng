@@ -6,7 +6,9 @@
       vertical
       class="mx-auto rounded-xl mt-10"
     >
-      <div class="text-h4 grey--text text--darken-2 ml-4 mt-4">Rejestracja</div>
+      <div class="text-h4 grey--text text--darken-2 ml-4 mt-4">
+        Rejestracja doktora
+      </div>
       <v-stepper-step step="1" :complete="el > 1"> Dane konta </v-stepper-step>
 
       <v-stepper-content step="1">
@@ -29,6 +31,20 @@
             hint="Conajmniej 6 znaków"
             counter
             @click:append="show = !show"
+          ></v-text-field>
+          <v-text-field
+            outlined
+            v-model="repeatedPassword"
+            :append-icon="showRepeated ? 'mdi-eye' : 'mdi-eye-off'"
+            :rules="[
+              (v) => !!v || 'Powtórzone hasło jest wymagane',
+              (v) =>
+                (v && v === password) || 'Powtórzone hasło jest niepoprawne',
+            ]"
+            :type="showRepeated ? 'text' : 'password'"
+            label="Powtórz hasło"
+            counter
+            @click:append="showRepeated = !showRepeated"
           ></v-text-field>
           <div class="d-flex">
             <v-spacer></v-spacer>
@@ -69,13 +85,6 @@
             label="Telefon"
             required
           ></v-text-field>
-          <v-text-field
-            outlined
-            v-model="pesel"
-            :rules="peselRules"
-            label="PESEL"
-            required
-          ></v-text-field>
           <div class="d-flex">
             <v-btn text @click="el = 1"> Wróć </v-btn>
             <v-spacer></v-spacer>
@@ -90,41 +99,10 @@
         </v-form>
       </v-stepper-content>
 
-      <v-stepper-step step="3"> Adres </v-stepper-step>
+      <v-stepper-step step="3"> Instytut </v-stepper-step>
 
       <v-stepper-content step="3">
         <v-form ref="addressForm" v-model="addressValid" class="mx-5">
-          <v-text-field
-            class="mt-1"
-            outlined
-            v-model="address.city"
-            :counter="40"
-            :rules="cityRules"
-            label="Miejscowość"
-            required
-          ></v-text-field>
-          <v-text-field
-            outlined
-            v-model="address.street"
-            :counter="100"
-            :rules="streetRules"
-            label="Ulica i numer budynku"
-            required
-          ></v-text-field>
-          <v-text-field
-            outlined
-            v-model="address.local_number"
-            label="Numer lokalu (opcjonalne)"
-            type="number"
-          ></v-text-field>
-          <v-text-field
-            outlined
-            v-model="address.zip_code"
-            :counter="6"
-            :rules="zipcodeRules"
-            label="Kod pocztowy"
-            required
-          ></v-text-field>
           <v-autocomplete
             no-data-text="Brak instytutów w bazie danych"
             outlined
@@ -157,6 +135,16 @@
             label="Kod instytutu"
             required
           ></v-text-field>
+          <div class="d-flex align-center">
+            <v-checkbox
+              required
+              v-model="privacyAccept"
+              color="primary"
+            ></v-checkbox>
+            <div>
+              Oświadczam, że zapoznałem się z <PrivacyPolicy /> i ją akceptuję
+            </div>
+          </div>
           <div class="d-flex mt-2 mb-1">
             <v-btn text @click="el = 2"> Wróć </v-btn>
             <v-spacer></v-spacer>
@@ -177,11 +165,17 @@
 
 <script>
 import { mapActions, mapGetters } from "vuex";
+import PrivacyPolicy from "@/components/PrivacyPolicy";
 export default {
+  components: {
+    PrivacyPolicy,
+  },
   data: () => ({
+    privacyAccept: false,
     el: 1,
     registerLoader: false,
     show: false,
+    showRepeated: false,
     loader: false,
     valid: true,
     personalValid: true,
@@ -197,7 +191,8 @@ export default {
     instituteCode: "",
     instituteCodeRules: [
       (v) => !!v || "Kod instytucji jest wymagany",
-      (v) => (v && v.length == 8) || "Kod instytucji musi składać się z 8 znaków",
+      (v) =>
+        (v && v.length == 8) || "Kod instytucji musi składać się z 8 znaków",
     ],
     email: "",
     emailRules: [
@@ -209,6 +204,7 @@ export default {
       (v) => !!v || "Hasło jest wymagane",
       (v) => v.length >= 6 || "Conajmniej 6 znaków",
     ],
+    repeatedPassword: "",
     name: "",
     nameRules: [
       (v) => !!v || "Imię jest wymagane",
@@ -264,17 +260,15 @@ export default {
     },
     async registerClick() {
       if (!this.$refs.addressForm.validate()) return;
+      if (!this.privacyAccept) return;
 
       this.loader = true;
       const data = {
         email: this.email,
         password: this.password,
-        address: this.address,
-        pesel: this.pesel,
         name: this.name,
         surname: this.surname,
         phone: this.phone,
-        local_number: this.local_number,
         instituteRef: this.selectedInstitute.ref,
         instituteName: this.selectedInstitute.name,
         instituteCode: this.instituteCode,
@@ -282,7 +276,6 @@ export default {
       };
       await this.registerDoctor(data);
       this.loader = false;
-      console.log("Registerd!");
     },
     async getInstitutes() {
       this.institutes = await this.fetchInstitutesList();
@@ -303,7 +296,6 @@ export default {
     instituteSelect(val) {
       if (val) {
         this.selectedInstitute = this.institutes.find((v) => (v.ref = val));
-        console.log(this.selectedInstitute.name);
       }
     },
   },

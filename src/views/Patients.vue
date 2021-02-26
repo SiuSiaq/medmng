@@ -2,18 +2,38 @@
   <v-container fluid :class="$vuetify.breakpoint.mobile ? 'pa-0' : ''">
     <v-row no-gutters v-if="!$vuetify.breakpoint.mobile">
       <v-col cols="12" md="3">
-        <v-card class="px-4 pt-2" rounded="lg" height="100%" style="max-height: 87vh;">
-          <v-autocomplete
-            no-data-text="Brak pacjentów w bazie danych"
-            @change="searchSelect"
-            offset-y
-            v-model="searchPatientId"
-            :items="getPatients"
-            item-text="fullname"
-            item-value="id"
-            label="Pacjent"
-            prepend-icon="mdi-account-search-outline"
-          ></v-autocomplete>
+        <v-card
+          class="px-4 pt-2"
+          rounded="lg"
+          height="100%"
+          elevation="3"
+        >
+          <div class="d-flex align-center">
+            <v-autocomplete
+              no-data-text="Brak pacjentów w bazie danych"
+              @change="searchSelect"
+              offset-y
+              v-model="searchPatientId"
+              :items="getPatients"
+              :item-text="searchOptionModel"
+              item-value="id"
+              label="Pacjent"
+              prepend-icon="mdi-account-search-outline"
+            ></v-autocomplete>
+            <v-menu :close-on-content-click="true">
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn v-bind="attrs" v-on="on" icon>
+                  <v-icon>mdi-cog</v-icon>
+                </v-btn>
+              </template>
+
+              <v-list>
+                <v-list-item @click="searchOptionClick(i)" v-for="(option, i) in searchOptions" :key="i">
+                  <v-list-item-title>{{ option.text }}</v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-menu>
+          </div>
           <v-list three-line class="patientList">
             <v-list-item-group>
               <v-list-item
@@ -25,11 +45,10 @@
                   patient.name[0]
                 }}</v-list-item-avatar>
                 <v-list-item-content>
-                  <v-list-item-title>{{ patient.fullname }}</v-list-item-title>
+                  <v-list-item-title>{{ searchOptionModel === "fullname" ? patient.fullname : patient.pesel }}</v-list-item-title>
                   <v-list-item-subtitle
-                    >{{ patient.phone }} <br />
-                    {{ patient.email }}</v-list-item-subtitle
-                  >
+                    >{{ searchOptionModel === "fullname" ? patient.pesel : patient.fullname }} <br />
+                    {{ patient.email }}</v-list-item-subtitle>
                 </v-list-item-content>
               </v-list-item>
             </v-list-item-group>
@@ -37,7 +56,11 @@
         </v-card>
       </v-col>
       <v-col cols="12" md="9">
-        <v-card class="mt-5 mt-md-0 ml-md-5 patientPreview" height="100%" rounded="lg">
+        <div
+          class="mt-5 mt-md-0 ml-md-5 patientPreview"
+          height="100%"
+          rounded="lg"
+        >
           <v-row class="pa-5">
             <v-col cols="6">
               <div class="caption">Imię</div>
@@ -92,7 +115,7 @@
               </v-list>
             </v-col>
           </v-row>
-        </v-card>
+        </div>
       </v-col>
     </v-row>
 
@@ -105,17 +128,32 @@
 
       <v-tabs-items v-model="tab">
         <v-tab-item class="pa-4">
-          <v-autocomplete
-            no-data-text="Brak pacjentów w bazie danych"
-            @change="searchSelect"
-            offset-y
-            v-model="searchPatientId"
-            :items="getPatients"
-            item-text="fullname"
-            item-value="id"
-            label="Pacjent"
-            prepend-icon="mdi-account-search-outline"
-          ></v-autocomplete>
+          <div class="d-flex align-center">
+            <v-autocomplete
+              no-data-text="Brak pacjentów w bazie danych"
+              @change="searchSelect"
+              offset-y
+              v-model="searchPatientId"
+              :items="getPatients"
+              :item-text="searchOptionModel"
+              item-value="id"
+              label="Pacjent"
+              prepend-icon="mdi-account-search-outline"
+            ></v-autocomplete>
+            <v-menu :close-on-content-click="true">
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn v-bind="attrs" v-on="on" icon>
+                  <v-icon>mdi-cog</v-icon>
+                </v-btn>
+              </template>
+
+              <v-list>
+                <v-list-item @click="searchOptionClick(i)" v-for="(option, i) in searchOptions" :key="i">
+                  <v-list-item-title>{{ option.text }}</v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-menu>
+          </div>
           <v-list three-line style="overflow-y: scroll;">
             <v-list-item-group>
               <v-list-item
@@ -127,11 +165,10 @@
                   patient.name[0]
                 }}</v-list-item-avatar>
                 <v-list-item-content>
-                  <v-list-item-title>{{ patient.fullname }}</v-list-item-title>
+                  <v-list-item-title>{{ searchOptionModel === "fullname" ? patient.fullname : patient.pesel }}</v-list-item-title>
                   <v-list-item-subtitle
-                    >{{ patient.phone }} <br />
-                    {{ patient.email }}</v-list-item-subtitle
-                  >
+                    >{{ searchOptionModel === "fullname" ? patient.pesel : patient.fullname }} <br />
+                    {{ patient.email }}</v-list-item-subtitle>
                 </v-list-item-content>
               </v-list-item>
             </v-list-item-group>
@@ -204,6 +241,21 @@ export default {
     Survey,
   },
   data: () => ({
+    searchOptions: [
+      {
+        text: "Imię i nazwisko",
+        value: "fullname",
+      },
+      {
+        text: "PESEL",
+        value: "pesel",
+      },
+    ],
+    searchOption: {
+        text: "Imię i nazwisko",
+        value: "fullname",
+      },
+    searchOptionModel: 'fullname',
     tab: 0,
     selectedPatient: {
       name: "",
@@ -224,6 +276,9 @@ export default {
         });
       }
     },
+    searchOptionClick(i) {
+      this.searchOptionModel = this.searchOptions[i].value;
+    }
   },
   computed: {
     ...mapGetters(["getPatients"]),

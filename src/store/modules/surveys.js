@@ -1,7 +1,9 @@
-import { db, increment } from "@/main"
+import { db } from "@/main"
 const state = {
     surveys: [],
+    surveysUnsubscriber: null,
     userSurveys: [],
+    userSurveysUnsubscriber: null,
 }
 
 const getters = {
@@ -12,9 +14,10 @@ const getters = {
 }
 
 const actions = {
-    async fetchSurveys({ commit, rootState }) {
+    async fetchSurveys({ commit, rootState, state }) {
         try {
-            rootState.login.userData.wardRef.collection('surveys')
+            state.surveys = []
+            let surveysUnsubscriber = rootState.login.userData.wardRef.collection('surveys')
                 .onSnapshot(snapshot => {
                     snapshot.docChanges().forEach(change => {
                         if (change.type === 'added') {
@@ -34,17 +37,19 @@ const actions = {
                         }
                     });
                 });
+                commit('setSurveysUnsubscriber', surveysUnsubscriber)
         } catch (error) {
             console.error(error)
         }
     },
-    async fetchUserSurveys({ commit, rootState }) {
+    async fetchUserSurveys({ commit, rootState, state }) {
         try {
             if (!rootState.login.user) {
                 console.log('No user')
                 return
             }
-            db.collection('users').doc(rootState.login.user.uid).collection('surveys')
+            state.userSurveys = [];
+            let userSurveysUnsubscriber = db.collection('users').doc(rootState.login.user.uid).collection('surveys')
                 .onSnapshot(snapshot => {
                     snapshot.docChanges().forEach(change => {
                         if (change.type === 'added') {
@@ -64,6 +69,8 @@ const actions = {
                         }
                     });
                 });
+            
+            commit('setUserSurveysUnsubscriber', userSurveysUnsubscriber)
         } catch (error) {
             console.error(error)
         }
@@ -76,12 +83,6 @@ const actions = {
             const batch = db.batch()
 
             const patientSurveyRef = db.collection('users').doc(rootState.login.user.uid).collection('surveys').doc(survey.id);
-            const surveyRef = survey.surveyRef;
-
-            let data = {}
-            survey.fields.forEach(v => {
-                data[v.columnName] = v.data
-            })
             
             batch.update(patientSurveyRef, {
                 completed: true,
@@ -89,30 +90,8 @@ const actions = {
                 submitted: new Date(),
                 sum: survey.sum,
                 groupSummable: survey.groupSummable,
+                groupSum: survey.groupSum,
             })
-
-            if (survey.appointmentSurveyRef) {
-                batch.update(survey.appointmentSurveyRef, {
-                    completed: true,
-                    status: "complete",
-                    fields: survey.fields,
-                    submitted: new Date(),
-                    sum: survey.sum,
-                    groupSummable: survey.groupSummable,
-                    data,
-                })
-            }
-
-            batch.set(surveyRef.collection('submittedSurveys').doc(), {
-                data,
-                submitted: new Date(),
-            })
-
-            if (survey.appointmentRef) {
-                batch.update(survey.appointmentRef, {
-                    surveyCount: increment,
-                })
-            }
 
             await batch.commit();
 
@@ -155,13 +134,13 @@ const actions = {
                 sent: true,
                 sentDate: new Date(),
             })
-            dispatch('throwSurveyAlert', {
+            dispatch('throwMainAlert', {
                 text: 'Ankieta wysłana pomyślnie',
                 success: true,
             })
         } catch (error) {
             console.error(error)
-            dispatch('throwSurveyAlert', {
+            dispatch('throwMainAlert', {
                 text: 'Wysyłanie ankiety nie powiodło się',
                 success: false,
             })
@@ -180,10 +159,34 @@ const actions = {
             success: true,
         })
         return data
+    },
+    async unsubscribeSurveys({ state }) {
+        if (state.surveysUnsubscriber) {
+            try {
+                await state.surveysUnsubscriber();
+                state.surveysUnsubscriber = null;
+            } catch (error) {
+                console.error(error)
+            }
+        }
+    },
+    async unsubscribeUserSurveys({ state }) {
+        if (state.userSurveysUnsubscriber) {
+            try {
+                await state.userSurveysUnsubscriber();
+                state.userSurveysUnsubscriber = null;
+                state.surveys = [];
+                state.userSurveys = [];
+            } catch (error) {
+                console.error(error)
+            }
+        }
     }
 }
 
 const mutations = {
+    setSurveysUnsubscriber: (state, data) => state.surveysUnsubscriber = data,
+    setUserSurveysUnsubscriber: (state, data) => state.userSurveysUnsubscriber = data,
     patientSurveyAdded: (state, data) => state.userSurveys.unshift(data),
     patientSurveyRemoved: (state, id) => state.userSurveys = state.userSurveys.filter(v => v.id !== id),
     patientSurveyModified: (state, data) => state.userSurveys.map((obj) => obj.id === data.id ? data : obj),

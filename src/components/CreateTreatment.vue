@@ -269,6 +269,8 @@ export default {
       setTimeout(() => {
         this.dialog = false;
         this.readonly = false;
+        this.doctorSurveys = []
+        this.patientSurveys = []
         this.$refs.form.reset();
       }, 1500);
     },

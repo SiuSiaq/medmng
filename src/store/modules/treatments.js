@@ -1,5 +1,6 @@
 const state = {
     treatments: [],
+    treatmentsUnsubscriber: null,
 }
 
 const getters = {
@@ -7,8 +8,9 @@ const getters = {
 }
 
 const actions = {
-    async fetchTreatments({ commit, rootState }) {
-        rootState.login.userData.wardRef.collection('treatments')
+    async fetchTreatments({ commit, rootState, state }) {
+        state.treatments = []
+        let treatmentsUnsubscriber = rootState.login.userData.wardRef.collection('treatments')
             .onSnapshot(snapshot => {
                 snapshot.docChanges().forEach(change => {
                     if (change.type === 'added') {
@@ -25,6 +27,7 @@ const actions = {
                     }
                 });
             });
+            commit('setTreatmentsUnsubscriber', treatmentsUnsubscriber)
     },
     async createTreatment({ rootState, dispatch }, treatment) {
         try {
@@ -67,11 +70,23 @@ const actions = {
                 success: false,
             })
         }
+    },
+    async unsubscribeTreatments({ state }) {
+        if (state.treatmentsUnsubscriber) {
+            try {
+                await state.treatmentsUnsubscriber();
+                state.treatmentsUnsubscriber = null;
+                state.treatments = [];
+            } catch (error) {
+                console.error(error)
+            }
+        }
     }
 }
 
 const mutations = {
     setTreatments: (state, data) => state.treatments = data,
+    setTreatmentsUnsubscriber: (state, data) => state.treatmentsUnsubscriber = data,
     treatmentCreated: (state, data) => state.treatments.unshift(data),
     treatmentRemoved: (state, id) => state.treatments = state.treatments.filter(v => v.id !== id),
 }

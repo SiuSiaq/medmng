@@ -99,7 +99,7 @@ export default {
   },
   watch: {
     user(value) {
-      if (value !== null && value !== undefined) {
+      if (value) {
         this.$router.push("/");
       }
     },

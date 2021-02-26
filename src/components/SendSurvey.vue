@@ -49,8 +49,11 @@ export default {
     ...mapActions(["sendSurvey"]),
     async sendClick() {
       if (!this.patient) return;
+      let patientData = this.getPatients.find(p => p.id === this.patient)
+      let patientFullName = `${patientData.name} ${patientData.surname}`
+      let patientPesel = patientData.pesel
       this.loader = true;
-      await this.sendSurvey({ survey: this.survey, id: this.patient });
+      await this.sendSurvey({ survey: this.survey, id: this.patient, patientPesel, patientFullName });
       this.loader = false;
       this.dialog = false;
     },

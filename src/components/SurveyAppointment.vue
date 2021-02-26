@@ -18,10 +18,8 @@
         <v-list-item-content>
           <v-list-item-title>{{ survey.name }}</v-list-item-title>
           <v-list-item-subtitle>
-            <v-list-item-subtitle
-              >{{ timeText }}</v-list-item-subtitle
-            ></v-list-item-subtitle
-          >
+            <v-list-item-subtitle>{{ timeText }}</v-list-item-subtitle>
+          </v-list-item-subtitle>
         </v-list-item-content>
       </v-list-item>
     </template>
@@ -73,6 +71,17 @@
           >
             <div class="caption">Suma</div>
             <div class="mb-2">{{ survey.sum }}</div>
+          </div>
+          <div v-if="survey.groupSummable && getUserData.doctor">
+            <div class="caption">Suma grupowa</div>
+            <div
+              v-for="(groupKey, i) in Object.keys(survey.groupSum)"
+              :key="i"
+              class="ml-1 mb-1"
+            >
+              <div class="caption">Grupa {{ groupKey }}</div>
+              <div>{{ survey.groupSum[groupKey] }}</div>
+            </div>
           </div>
           <div v-for="(field, i) in survey.fields" :key="i">
             <div class="caption">{{ i + 1 + ". " + field.name }}</div>

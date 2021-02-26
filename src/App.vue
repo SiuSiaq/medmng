@@ -38,7 +38,6 @@ export default {
 
 <style>
 .appstyle {
-  background: #1976d2;
   max-height: 100%;
 }
 </style>

@@ -2,6 +2,7 @@ import { db } from '@/main'
 
 const state = {
     patients: [],
+    patientsUnsubscriber: null,
 }
 
 const getters = {
@@ -9,8 +10,9 @@ const getters = {
 }
 
 const actions = {
-    async fetchPatients({ commit, rootState }) {
-        rootState.login.userData.instituteRef.collection('patients')
+    async fetchPatients({ commit, rootState, state }) {
+        state.patients = []
+        let patientsUnsubscriber = rootState.login.userData.instituteRef.collection('patients')
             .onSnapshot(snapshot => {
                 snapshot.docChanges().forEach(change => {
                     if (change.type === 'added') {
@@ -27,6 +29,7 @@ const actions = {
                     }
                 });
             });
+            commit('setPatientsUnsubscriber', patientsUnsubscriber)
     },
     async fetchPatientDataSurveys({ dispatch }, id) {
         try {
@@ -55,11 +58,22 @@ const actions = {
                 success: false,
             })
         }
+    },
+    async unsubscribePatients({ state }) {
+        if (state.patientsUnsubscriber) {
+            try {
+                await state.patientsUnsubscriber();
+                state.patientsUnsubscriber = null;
+            } catch (error) {
+                console.error(error)
+            }
+        }
     }
 }
 
 const mutations = {
     setPatients: (state, data) => state.patients = data,
+    setPatientsUnsubscriber: (state, data) => state.patientsUnsubscriber = data,
     patientAdded: (state, data) => state.patients.push(data),
     patientRemoved: (state, id) => state.patients = state.patients.filter(v => v.id !== id),
 }

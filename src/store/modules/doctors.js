@@ -1,6 +1,7 @@
 
 const state = {
     doctors: [],
+    doctorsUnsubscriber: null,
 }
 
 const getters = {
@@ -8,8 +9,9 @@ const getters = {
 }
 
 const actions = {
-    async fetchDoctors({ commit, rootState }) {
-        rootState.login.userData.instituteRef.collection('doctors')
+    async fetchDoctors({ commit, rootState, state }) {
+        state.doctors = []
+        let doctorsUnsubscriber = rootState.login.userData.instituteRef.collection('doctors')
             .onSnapshot(snapshot => {
                 snapshot.docChanges().forEach(change => {
                     if (change.type === 'added') {
@@ -26,6 +28,7 @@ const actions = {
                     }
                 });
             });
+            commit('setDoctorsUnsubscriber', doctorsUnsubscriber)
     },
     async fetchDoctorDataSurveys({ dispatch, rootState }, id) {
         try {
@@ -54,11 +57,22 @@ const actions = {
                 success: false,
             })
         }
+    },
+    async unsubscribeDoctors({ state }) {
+        if (state.doctorsUnsubscriber) {
+            try {
+                await state.doctorsUnsubscriber();
+                state.doctorsUnsubscriber = null;
+            } catch (error) {
+                console.error(error)
+            }
+        }
     }
 }
 
 const mutations = {
     setDoctors: (state, data) => state.doctors = data,
+    setDoctorsUnsubscriber: (state, data) => state.doctorsUnsubscriber = data,
     doctorAdded: (state, data) => state.doctors.push(data),
     doctorRemoved: (state, id) => state.doctors = state.doctors.filter(v => v.id !== id),
 }

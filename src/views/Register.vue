@@ -30,6 +30,20 @@
             counter
             @click:append="show = !show"
           ></v-text-field>
+          <v-text-field
+            outlined
+            v-model="repeatedPassword"
+            :append-icon="showRepeated ? 'mdi-eye' : 'mdi-eye-off'"
+            :rules="[
+              (v) => !!v || 'Powtórzone hasło jest wymagane',
+              (v) =>
+                (v && v === password) || 'Powtórzone hasło jest niepoprawne',
+            ]"
+            :type="showRepeated ? 'text' : 'password'"
+            label="Powtórz hasło"
+            counter
+            @click:append="showRepeated = !showRepeated"
+          ></v-text-field>
           <div class="d-flex">
             <v-spacer></v-spacer>
             <v-btn color="primary" :disabled="!valid" @click="stepFirstClick">
@@ -137,6 +151,10 @@
             required
           >
           </v-autocomplete>
+          <div class="d-flex align-center">
+            <v-checkbox required v-model="privacyAccept" color="primary"></v-checkbox>
+            <div>Oświadczam, że zapoznałem się z <PrivacyPolicy /> i ją akceptuję</div>
+          </div>
           <div class="d-flex mt-2 mb-1">
             <v-btn text @click="el = 2"> Wróć </v-btn>
             <v-spacer></v-spacer>
@@ -157,11 +175,17 @@
 
 <script>
 import { mapActions, mapGetters } from "vuex";
+import PrivacyPolicy from "@/components/PrivacyPolicy";
 export default {
+  components: {
+    PrivacyPolicy,
+  },
   data: () => ({
+    privacyAccept: false,
     el: 1,
     registerLoader: false,
     show: false,
+    showRepeated: false,
     loader: false,
     valid: true,
     personalValid: true,
@@ -183,6 +207,7 @@ export default {
       (v) => !!v || "Hasło jest wymagane",
       (v) => v.length >= 6 || "Conajmniej 6 znaków",
     ],
+    repeatedPassword: "",
     name: "",
     nameRules: [
       (v) => !!v || "Imię jest wymagane",
@@ -236,6 +261,7 @@ export default {
     },
     async registerClick() {
       if (!this.$refs.addressForm.validate()) return;
+      if(!this.privacyAccept) return;
 
       this.loader = true;
       const data = {
@@ -252,7 +278,6 @@ export default {
       };
       await this.register(data);
       this.loader = false;
-      console.log("Registerd!");
     },
     async getInstitutes() {
       this.institutes = await this.fetchInstitutesList();
@@ -273,7 +298,6 @@ export default {
     instituteSelect(val) {
       if (val) {
         this.selectedInstitute = this.institutes.find((v) => (v.ref = val));
-        console.log(this.selectedInstitute.name);
       }
     },
   },

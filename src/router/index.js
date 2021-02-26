@@ -109,9 +109,9 @@ router.beforeEach((to, from, next) => {
       next();
     }
   } else if (to.matched.some(record => record.meta.requiresGuest)) {
-    // Check if NO logged user
+    // Check if logged user
     if (auth.currentUser) {
-      // Go to login
+      // Go to home
       next({
         path: '/',
         query: {

@@ -1,17 +1,16 @@
 <template>
   <v-container
     fluid
-    class="personPage"
-    :class="!$vuetify.breakpoint.mobile ? 'pa-0' : ''"
+    class="personPage pa-0"
   >
     <div
-      v-if="!$vuetify.breakpoint.mobile"
-      style="width: 100%; height: 100px;"
-      class="primary mx-0 pt-4 pl-6"
+      style="width: 100%;"
+      :class="$vuetify.breakpoint.mobile ? 'personBaner pt-1' : 'personBanerDesktop pt-4'"
+      class="primary mx-0 pl-6"
     >
-      <div class="text-h3 font-weight-medium white--text">Dane osobowe</div>
+      <div :class="$vuetify.breakpoint.mobile ? 'text-h4' : 'text-h3'" class="font-weight-medium white--text">Dane osobowe</div>
     </div>
-    <v-row class="mt-4 ml-md-4 ml-0">
+    <v-row class="mt-4 ml-md-4 ml-0 pl-3">
       <v-col cols="12" md="6">
         <div class="caption">Imię</div>
         <div class="black--text text-subtitle-1">{{ getUserData.name }}</div>
@@ -28,7 +27,7 @@
         <div class="caption">Telefon</div>
         <div class="black--text text-subtitle-1">{{ getUserData.phone }}</div>
       </v-col>
-      <v-col cols="12" md="6">
+      <v-col cols="12" md="6" v-if="!getUserData.doctor">
         <div class="caption">Adres zamieszkania</div>
         <div class="black--text text-subtitle-1">
           {{
@@ -38,13 +37,13 @@
           }}
         </div>
       </v-col>
-      <v-col cols="12" md="6">
+      <v-col cols="12" md="6" v-if="!getUserData.doctor">
         <div class="caption">Płeć</div>
         <div class="black--text text-subtitle-1">
           {{ getUserData.sex === "m" ? "Mężczyzna" : "Kobieta" }}
         </div>
       </v-col>
-      <v-col cols="12" md="6">
+      <v-col cols="12" md="6" v-if="!getUserData.doctor">
         <div class="caption">Data urodzenia</div>
         <div class="black--text text-subtitle-1">
           {{
@@ -70,5 +69,13 @@ export default {
 .personPage {
   height: 100%;
   background: #fff;
+}
+
+.personBanerDesktop {
+  height: 100px;
+}
+
+.personBaner {
+  height: 60px;
 }
 </style>

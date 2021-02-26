@@ -59,6 +59,10 @@
           style="max-width: 700px"
           class="mx-auto mt-5"
         >
+          <div v-if="survey.patientFullName && getUserData.doctor">
+            <div class="caption">Dotyczy</div>
+            <div class="mb-2">{{ survey.patientFullName }}</div>
+          </div>
           <div class="caption">Opis</div>
           <div class="mb-2">
             {{
@@ -85,7 +89,11 @@
             "
           >
             <div class="caption">Suma grupowa</div>
-            <div v-for="(groupKey, i) in Object.keys(survey.groupSum)" :key="i" class="ml-1 mb-1">
+            <div
+              v-for="(groupKey, i) in Object.keys(survey.groupSum)"
+              :key="i"
+              class="ml-1 mb-1"
+            >
               <div class="caption">Grupa {{ groupKey }}</div>
               <div>{{ survey.groupSum[groupKey] }}</div>
             </div>
@@ -155,12 +163,12 @@
               >Pobierz</v-btn
             >
             <v-spacer></v-spacer>
-            <SendSurvey :survey="survey" v-if="sendable" />
             <v-btn
-              v-else-if="!survey.completed"
+              v-if="!survey.completed"
               color="primary"
               :loading="loader"
               @click.prevent="submitClick"
+              :disabled="!valid"
               >Wyślij</v-btn
             >
             <v-btn v-else color="primary" @click.prevent="dialog = false"
@@ -175,7 +183,6 @@
 
 <script>
 import { mapActions, mapGetters } from "vuex";
-import SendSurvey from "@/components/SendSurvey";
 export default {
   props: ["survey", "sendable"],
   data: () => ({
@@ -278,9 +285,6 @@ export default {
         this.survey.completed ? "Wypełniona" : "Wysłana"
       } ${dd}-${mm}-${yy}`;
     },
-  },
-  components: {
-    SendSurvey,
   },
 };
 </script>

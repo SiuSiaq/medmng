@@ -168,6 +168,7 @@ export default {
       if (!this.nonRegistered) {
         let patient = this.getPatients.find((v) => v.id === this.patient);
         this.appointment.patient = patient.fullname;
+        this.appointment.patientPeselNumber = patient.pesel;
         this.appointment.patientRef = patient.id;
         this.appointment.patientPesel = null;
       } else {
@@ -210,7 +211,6 @@ export default {
       });
       this.appointment.surveyRequiredCount = this.appointment.surveys.length;
       this.appointment.surveyCount = 0;
-      console.log('starting')
       await this.addAppointment(this.appointment);
       this.loader = false;
       setTimeout(() => {

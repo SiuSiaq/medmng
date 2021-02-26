@@ -49,6 +49,7 @@
               <v-form
                 v-model="valid"
                 ref="surveyForm"
+                :disabled="loader"
                 class="pr-2"
                 :class="!$vuetify.breakpoint.mobile ? 'borderClass' : ''"
               >
@@ -213,20 +214,15 @@ export default {
       });
       await this.createSurvey(this.survey);
       this.loader = false;
-      this.survey = {
-        name: "",
-        treatment: "",
-        description: "",
-        fields: [],
-      };
+      setTimeout(() => {
+        this.dialog = false;
+        this.$refs.surveyForm.reset();
+        this.survey.fields = [];
+      }, 1500);
     },
     deleteSurveyClick() {
-      this.survey = {
-        name: "",
-        treatment: "",
-        description: "",
-        fields: [],
-      };
+      this.$refs.surveyForm.reset();
+      this.survey.fields = [];
     },
   },
   watch: {

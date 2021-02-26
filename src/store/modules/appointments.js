@@ -2,6 +2,7 @@ import { db } from '@/main'
 
 const state = {
     appointments: [],
+    appointmentsUnsubscriber: null,
 }
 
 const getters = {
@@ -9,9 +10,10 @@ const getters = {
 }
 
 const actions = {
-    async fetchAppointments({ commit, rootState }) {
+    async fetchAppointments({ commit, rootState, state }) {
         try {
-            rootState.login.userData.wardRef.collection('appointments')
+            state.appointments = []
+            let unsubscribe = rootState.login.userData.wardRef.collection('appointments')
                 .onSnapshot(snapshot => {
                     snapshot.docChanges().forEach(change => {
                         if (change.type === 'added') {
@@ -28,6 +30,8 @@ const actions = {
                         }
                     });
                 });
+            commit('setAppointmentsUnsubscriber', unsubscribe)
+
         } catch (error) {
             console.error(error)
         }
@@ -54,9 +58,10 @@ const actions = {
                         userRef = db.collection('users').doc(appointment.doctorRef.id).collection('surveys').doc()
 
                     if (survey.timeType === 'Natychmiast') {
-                        console.log('sending')
                         if (userRef) {
                             batch.set(userRef, {
+                                patientPeselNumber: appointment.patientPeselNumber,
+                                patientFullName: appointment.patient,
                                 ...fullSurvey,
                                 sent: true,
                                 sentDate: new Date(),
@@ -73,6 +78,7 @@ const actions = {
                                 appointmentSurveyRef,
                                 surveyRef: survey.ref,
                                 pesel: appointment.patientPesel,
+                                patientPeselNumber: appointment.patientPesel,
                             })
                         }
 
@@ -83,6 +89,8 @@ const actions = {
 
                     } else {
                         let newAppointmentSurvey = {
+                            patientPeselNumber: appointment.patientPeselNumber,
+                            patientFullName: appointment.patient,
                             ...fullSurvey,
                             sendDate: new Date(survey.sendDate.toDateString()),
                             sent: false,
@@ -91,7 +99,7 @@ const actions = {
                             surveyRef: survey.ref,
                             userRef,
                         }
-                        if(!userRef) {
+                        if (!userRef) {
                             newAppointmentSurvey.pesel = appointment.patientPesel;
                         }
                         batch.set(db.collection('appointment_surveys').doc(appointmentSurveyRef.id), newAppointmentSurvey)
@@ -138,11 +146,22 @@ const actions = {
                 success: false,
             })
         }
+    },
+    async unsubscribeAppointments({ state }) {
+        if (state.appointmentsUnsubscriber) {
+            try {
+                await state.appointmentsUnsubscriber();
+                state.appointmentsUnsubscriber = null;
+            } catch (error) {
+                console.error(error)
+            }
+        }
     }
 }
 
 const mutations = {
     setAppointments: (state, data) => state.appointments = data,
+    setAppointmentsUnsubscriber: (state, data) => state.appointmentsUnsubscriber = data,
     appointmentAdded: (state, data) => state.appointments.unshift(data),
     appointmentRemoved: (state, id) => state.appointments = state.appointments.filter(v => v.id !== id),
 }

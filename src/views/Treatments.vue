@@ -3,7 +3,7 @@
     <v-row no-gutters v-if="!$vuetify.breakpoint.mobile" style="height: 100%">
       <CreateTreatment />
       <v-col cols="12" md="3">
-        <v-card class="px-4 pt-2" style="max-height: 87vh;" rounded="lg" height="100%">
+        <v-card class="px-4 pt-2" elevation="3" rounded="lg" height="100%">
           <v-autocomplete
             no-data-text="Brak zabiegów w bazie danych"
             @change="searchSelect"
@@ -49,13 +49,13 @@
         </v-card>
       </v-col>
       <v-col cols="12" md="9">
-        <v-card
+        <div
           class="mt-5 mt-md-0 ml-md-5 treatmentPreview"
           rounded="lg"
           height="100%"
         >
           <TreatmentPreview :treatment="selectedTreatment" />
-        </v-card>
+        </div>
       </v-col>
     </v-row>
 

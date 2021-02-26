@@ -76,7 +76,6 @@ const actions = {
     },
     async registerDoctor({ commit }, userCredentials) {
         try {
-            let decoded = peselDecode(userCredentials.pesel);
             let user = await auth.createUserWithEmailAndPassword(userCredentials.email, userCredentials.password);
             await user.user.updateProfile({
                 displayName: `${userCredentials.name} ${userCredentials.surname}`
@@ -88,16 +87,12 @@ const actions = {
                 const batch = db.batch()
 
                 batch.set(userCredentials.instituteRef.collection('doctors').doc(user.user.uid), {
-                    pesel: userCredentials.pesel,
+                    instituteCode: userCredentials.instituteCode,
                     email: userCredentials.email,
                     fullname: `${userCredentials.name} ${userCredentials.surname}`,
                     name: userCredentials.name,
                     surname: userCredentials.surname,
                     phone: userCredentials.phone,
-                    address: userCredentials.address,
-                    local_number: userCredentials.local_number === undefined ? null : userCredentials.local_number,
-                    birthday: decoded.date,
-                    sex: decoded.sex,
                     registered: new Date(),
                     instituteRef: userCredentials.instituteRef,
                     instituteName: userCredentials.instituteName,
@@ -105,16 +100,11 @@ const actions = {
                 })
 
                 batch.set(db.collection('users').doc(user.user.uid), {
-                    pesel: userCredentials.pesel,
                     email: userCredentials.email,
                     fullname: `${userCredentials.name} ${userCredentials.surname}`,
                     name: userCredentials.name,
                     surname: userCredentials.surname,
                     phone: userCredentials.phone,
-                    address: userCredentials.address,
-                    local_number: userCredentials.local_number === undefined ? null : userCredentials.local_number,
-                    birthday: decoded.date,
-                    sex: decoded.sex,
                     registered: new Date(),
                     instituteRef: userCredentials.instituteRef,
                     instituteName: userCredentials.instituteName,
@@ -156,14 +146,15 @@ const actions = {
         }
         return true;
     },
-    async logOut({ commit }) {
+    async logOut({ commit, dispatch }) {
+        await dispatch('unsubscribeAll');
         await auth.signOut();
         commit('setIsLoggedIn', false);
         commit('setUser', null);
-        console.log("logged out");
+
         return;
     },
-    async fetchInstitutesList({dispatch}) {
+    async fetchInstitutesList({ dispatch }) {
         try {
             const res = await db.collection('utilities').doc('institutesList').get();
             let institutes = [];
@@ -207,12 +198,20 @@ const actions = {
                 var providerData = user.providerData;*/
             } else {
                 // User is signed out.
-                console.log("User signed out");
+                dispatch('unsubscribeAll');
                 commit('setIsLoggedIn', false);
                 commit('setUser', null);
             }
         });
     },
+    async unsubscribeAll({ dispatch }) {
+        await dispatch('unsubscribeUserSurveys');
+        await dispatch('unsubscribeSurveys');
+        await dispatch('unsubscribeAppointments');
+        await dispatch('unsubscribeTreatments');
+        await dispatch('unsubscribePatients');
+        await dispatch('unsubscribeDoctors');
+    }
 }
 
 const mutations = {
