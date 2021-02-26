@@ -1,7 +1,8 @@
 .DS_Store
 node_modules
-/dist
-/functions
+dist
+functions
+privateConfig.js
 
 
 # local env files

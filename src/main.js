@@ -6,18 +6,21 @@ import vuetify from './plugins/vuetify';
 import firebase from 'firebase/app';
 import 'firebase/firestore';
 import 'firebase/auth';
+import privateConfig from '../privateConfig.js'
 
 Vue.config.productionTip = false
 
-firebase.initializeApp({
-  apiKey: "AIzaSyAINieDLMEqDv9cm4Tbj9xyB4innfdwSK8",
-  authDomain: "medmng-ecc2d.firebaseapp.com",
-  databaseURL: "https://medmng-ecc2d.firebaseio.com",
-  projectId: "medmng-ecc2d",
-  storageBucket: "medmng-ecc2d.appspot.com",
-  messagingSenderId: "541660406802",
-  appId: "1:541660406802:web:fd2aa1d39e8c0babbe24cb"
+const firebaseInitConfig = privateConfig.config.firebase
 
+firebase.initializeApp({
+  apiKey: firebaseInitConfig.apiKey,
+  authDomain: firebaseInitConfig.authDomain,
+  databaseURL: firebaseInitConfig.databaseURL,
+  projectId: firebaseInitConfig.projectId,
+  storageBucket: firebaseInitConfig.storageBucket,
+  messagingSenderId: firebaseInitConfig.messagingSenderId,
+  appId: firebaseInitConfig.appId,
+  measurementId: firebaseInitConfig.measurementId
 })
 
 export const db = firebase.firestore();
